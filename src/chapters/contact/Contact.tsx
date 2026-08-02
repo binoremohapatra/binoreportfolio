@@ -171,39 +171,3 @@ export function Contact() {
     </div>
   );
 }
-            )}
-          </Notch >
-
-  <div className="flex-1 w-full flex flex-col justify-center items-center lg:items-end text-right">
-    <div className="text-white/40 font-mono text-xs uppercase tracking-widest">
-      System Connections: <span className="text-primary font-bold ml-2">1337</span>
-    </div>
-  </div>
-        </div >
-      </div >
-
-  {/* Structural Rhyme: The Closing Line using SignalName */ }
-  < div className = "mt-24 contact-reveal" >
-    <SignalName standalone={true} />
-      </div >
-
-  {/* Footer Sequence */ }
-  < footer className = "w-full mt-16 border-t border-border/20 pt-8 flex flex-col md:flex-row justify-between items-center gap-6 font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground/40 contact-reveal" >
-        <div>
-          © {new Date().getFullYear()} BINORE MOHAPATRA. ALL RIGHTS RESERVED.
-        </div>
-        
-        <div className="flex gap-8">
-          <a href="https://github.com/binore" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors p-2 -m-2">GitHub</a>
-          <a href="https://linkedin.com/in/binore" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors p-2 -m-2">LinkedIn</a>
-          <a href="https://twitter.com/binore" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors p-2 -m-2">Twitter</a>
-        </div>
-        
-        <div className="flex items-center gap-2">
-          <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
-          SYSTEM ONLINE
-        </div>
-      </footer >
-    </div >
-  );
-}
