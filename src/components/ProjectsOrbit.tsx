@@ -127,7 +127,7 @@ function DnaHelixSvg() {
 
 const PROJECTS = [
   { id: 8, title: 'OM Associates', category: 'TypeScript', github: 'https://github.com/binoremohapatra/om-associates', link: 'https://om-associates.vercel.app' },
-  { id: 2, title: 'Research.connect', category: 'Project', github: 'https://github.com/binoremohapatra/Research.connect', link: 'https://research-connect-pink.vercel.app', iframeDisabled: true },
+  { id: 2, title: 'Research.connect', category: 'Project', github: 'https://github.com/binoremohapatra/Research.connect', link: 'https://research-connect-pink.vercel.app', iframeDisabled: true, image: '/images/research-connect.png' },
   { id: 4, title: 'SubMeter', category: 'Java', github: 'https://github.com/binoremohapatra/submeter', link: 'https://submeter-lac.vercel.app' },
   { id: 12, title: 'Portfolio v2', category: 'JavaScript', github: 'https://github.com/binoremohapatra/binore-portfolio', link: 'https://binore-portfolio.vercel.app' },
   { id: 13, title: 'Portfolio Binore', category: 'JavaScript', github: 'https://github.com/binoremohapatra/Portfolio-Binore', link: 'https://portfolio-binore.vercel.app' },
@@ -523,7 +523,7 @@ export default function ProjectsOrbit() {
                 ) : (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
-                    src={`https://image.thum.io/get/width/800/crop/800/${project.link}`}
+                    src={(project as any).image || `https://image.thum.io/get/width/800/crop/800/${project.link}`}
                     alt={`${project.title} preview`}
                     className="w-full h-full object-cover object-top opacity-80 group-hover:opacity-100 transition-opacity duration-300"
                     loading="lazy"
