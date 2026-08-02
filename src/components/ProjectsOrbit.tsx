@@ -517,12 +517,8 @@ export default function ProjectsOrbit() {
           >
             {/* Full-bleed preview fills the whole card */}
             <div className="absolute inset-0 z-0">
-              {project.link ? (
-                i === activeCardIndex ? (
-                  <ActiveOnlyIframe url={project.link} />
-                ) : (
-                  <div className="w-full h-full" style={{ background: '#181a1b' }} />
-                )
+              {project.link && i === activeCardIndex ? (
+                <ActiveOnlyIframe url={project.link} />
               ) : (
                 <PlaceholderPreview project={project} />
               )}
