@@ -1,0 +1,14 @@
+﻿.curved-loop-container {
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+  user-select: none;
+  cursor: grab;
+}
+.curved-loop-container:active {
+  cursor: grabbing;
+}
+.curved-loop-svg {
+  width: 100%;
+  overflow: visible;
+}
