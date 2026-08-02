@@ -517,8 +517,18 @@ export default function ProjectsOrbit() {
           >
             {/* Full-bleed preview fills the whole card */}
             <div className="absolute inset-0 z-0">
-              {project.link && i === activeCardIndex && !(project as any).iframeDisabled ? (
-                <ActiveOnlyIframe url={project.link} />
+              {project.link ? (
+                i === activeCardIndex && !(project as any).iframeDisabled ? (
+                  <ActiveOnlyIframe url={project.link} />
+                ) : (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={`https://image.thum.io/get/width/800/crop/800/${project.link}`}
+                    alt={`${project.title} preview`}
+                    className="w-full h-full object-cover object-top opacity-80 group-hover:opacity-100 transition-opacity duration-300"
+                    loading="lazy"
+                  />
+                )
               ) : (
                 <PlaceholderPreview project={project} />
               )}
