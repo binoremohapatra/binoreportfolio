@@ -383,23 +383,11 @@ export default function ProjectsOrbit() {
             const card = cardEls[i];
             if (!card) continue;
 
-            // Adaptive depth cue: LOW tier skips expensive blur filters entirely
+            // Adaptive depth cue: Opacity + scale only for maximum performance
             const opacity = gsap.utils.mapRange(0, 45, 1, 0.05, Math.min(diff, 45));
             const scale = gsap.utils.mapRange(0, 45, 1, 0.9, Math.min(diff, 45));
 
-            if (tier === 'LOW') {
-              // No blur — opacity + scale only for performance
-              gsap.set(card, { opacity, scale, filter: 'none', force3D: true });
-            } else {
-              const maxBlur = tier === 'MEDIUM' ? 3 : 6;
-              const blur = diff > 20 ? gsap.utils.mapRange(20, 90, 0, maxBlur, diff) : 0;
-              gsap.set(card, {
-                opacity,
-                scale,
-                filter: blur > 0.3 ? `blur(${blur.toFixed(1)}px)` : 'none',
-                force3D: true,
-              });
-            }
+            gsap.set(card, { opacity, scale, force3D: true });
           }
 
           // Dynamic DNA Helix opacity: dim when a card is front-and-center (minDiff ~0), restore when transitioning
@@ -454,17 +442,9 @@ export default function ProjectsOrbit() {
       });
     }
 
-    // Normalize scroll on touch devices (iOS Safari jank fix)
-    if (isTouchDevice) {
-      ScrollTrigger.normalizeScroll(true);
-    }
-
     return () => {
       ScrollTrigger.getAll().forEach((t) => t.kill());
       floatAnim?.kill();
-      if (isTouchDevice) {
-        ScrollTrigger.normalizeScroll(false);
-      }
     };
   }, [tier, isTouchDevice, prefersReducedMotion]);
 
