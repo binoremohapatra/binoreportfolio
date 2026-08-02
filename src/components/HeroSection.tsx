@@ -163,12 +163,12 @@ export default function HeroSection() {
       <div className="absolute inset-0 [&_canvas]:!object-cover [&_canvas]:!object-[75%_center] sm:[&_canvas]:!object-[right_center] [&_video]:!object-cover [&_video]:!object-[75%_center] sm:[&_video]:!object-[right_center]">
         <ScrollyVideo
           src="/videos/full_site_intro_sequence.mp4"
-          useWebCodecs={false}
+          useWebCodecs={process.env.NODE_ENV === 'production'}
           cover={true}
           sticky={true}
           full={true}
           trackScroll={true}
-          transitionSpeed={6}
+          transitionSpeed={12}
           onChange={(percentage: number) => setScrollPercentage(percentage)}
         />
       </div>
