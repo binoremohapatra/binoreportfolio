@@ -314,29 +314,44 @@ export default function ConnectSection() {
           `}</style>
 
           <div className="animate-marquee">
-            {/* Repeat the list twice to create a seamless infinite loop */}
             {[...Array(2)].map((_, i) => (
-              <div key={i} className="flex gap-4 sm:gap-8 px-2 sm:px-4">
+              <div key={i} className="flex gap-6 sm:gap-8 px-3 sm:px-4">
                 {[
                   'Java DSA Master | Scaler Topics',
                   'Full-Stack Web Dev | Unified Mentor',
                   'AR Lens Development | Snap AR',
                   'Data Science Workshop | DUCAT',
-                ].map((cert, j) => (
-                  <div
-                    key={`${i}-${j}`}
-                    className="group/cert flex items-center gap-3 px-6 py-3 rounded-full bg-white/5 border border-white/10 backdrop-blur-sm text-white/80 font-mono text-xs whitespace-nowrap shadow-xl transition-colors hover:bg-white/10 cursor-default"
-                  >
-                    <div className="w-1.5 h-1.5 rounded-full bg-[#d97757]" />
-                    <EncryptedText
-                      text={cert}
-                      revealDelayMs={30}
-                      flipDelayMs={30}
-                      encryptedClassName="text-[#d97757]/80"
-                      revealedClassName="text-white/80 group-hover/cert:text-white transition-colors duration-300"
-                    />
-                  </div>
-                ))}
+                ].map((cert, j) => {
+                  const [title, provider] = cert.split(' | ');
+                  return (
+                    <div
+                      key={`${i}-${j}`}
+                      className="group/cert relative flex flex-col justify-center px-6 py-4 min-w-[280px] rounded-2xl bg-[#111315] border border-white/10 backdrop-blur-md shadow-[0_8px_30px_rgb(0,0,0,0.4)] transition-all duration-300 hover:-translate-y-1 hover:bg-[#181a1d] hover:border-white/20 hover:shadow-[0_15px_40px_rgba(45,212,191,0.15)] cursor-default overflow-hidden"
+                    >
+                      {/* Subtle gradient glow behind the text */}
+                      <div className="absolute inset-0 bg-gradient-to-br from-teal-500/10 to-transparent opacity-0 group-hover/cert:opacity-100 transition-opacity duration-500" />
+                      
+                      <div className="flex items-center gap-4 relative z-10">
+                        <div className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center shrink-0 group-hover/cert:bg-teal-500/20 group-hover/cert:border-teal-500/30 transition-colors duration-300 shadow-inner">
+                          <div className="w-2 h-2 rounded-full bg-teal-400 group-hover/cert:animate-pulse group-hover/cert:shadow-[0_0_10px_2px_rgba(45,212,191,0.6)]" />
+                        </div>
+                        
+                        <div className="flex flex-col gap-0.5">
+                          <EncryptedText
+                            text={title}
+                            revealDelayMs={30}
+                            flipDelayMs={30}
+                            encryptedClassName="text-teal-400/80 font-mono text-sm"
+                            revealedClassName="text-white font-sans font-bold tracking-tight text-[15px] sm:text-[16px] group-hover/cert:text-teal-300 transition-colors duration-300"
+                          />
+                          <span className="text-white/40 font-mono text-[10px] sm:text-[11px] uppercase tracking-[0.15em]">
+                            {provider}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             ))}
           </div>
