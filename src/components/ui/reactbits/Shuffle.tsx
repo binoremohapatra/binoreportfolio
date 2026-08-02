@@ -161,7 +161,7 @@ const Shuffle = ({
             textAlign: "center",
           });
           ch.setAttribute("data-orig", "1");
-          Object.assign(ch.style, {
+          Object.assign((ch as HTMLElement).style, {
             display: shuffleDirection === "up" || shuffleDirection === "down" ? "block" : "inline-block",
             width: w + "px",
             textAlign: "center",

@@ -43,7 +43,7 @@ export const Notch = forwardRef<HTMLDivElement, NotchProps>(
       0 100%
     )`;
 
-    const Component = Tag as React.ElementType;
+    const Component = Tag as any;
     return (
       <Component
         ref={ref}

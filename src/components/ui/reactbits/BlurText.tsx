@@ -1,12 +1,12 @@
-﻿"use client";
+"use client";
 // BlurText – React Bits (framer-motion variant)
-// Uses 'framer-motion' directly (no 'motion/react' sub-path in v12)
+// Uses 'framer-motion' directly (no 'framer-motion' sub-path in v12)
 import { motion } from "framer-motion";
 import { useEffect, useRef, useState, useMemo } from "react";
 
 const buildKeyframes = (
-  from: Record<string, unknown>,
-  steps: Record<string, unknown>[]
+  from: any,
+  steps: any[]
 ) => {
   const keys = new Set([...Object.keys(from), ...steps.flatMap((s) => Object.keys(s))]);
   const keyframes: Record<string, unknown[]> = {};
@@ -24,8 +24,8 @@ interface BlurTextProps {
   direction?: "top" | "bottom";
   threshold?: number;
   rootMargin?: string;
-  animationFrom?: Record<string, unknown>;
-  animationTo?: Record<string, unknown>[];
+  animationFrom?: any;
+  animationTo?: any[];
   easing?: (t: number) => number;
   onAnimationComplete?: () => void;
   stepDuration?: number;
@@ -102,8 +102,8 @@ const BlurText = ({
           <motion.span
             key={index}
             className="inline-block will-change-[transform,filter,opacity]"
-            initial={fromSnapshot as Record<string, unknown>}
-            animate={inView ? animateKeyframes : fromSnapshot}
+            initial={fromSnapshot as any}
+            animate={inView ? animateKeyframes : (fromSnapshot as any)}
             transition={spanTransition}
             onAnimationComplete={
               index === elements.length - 1 ? onAnimationComplete : undefined

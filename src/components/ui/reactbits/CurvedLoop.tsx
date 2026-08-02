@@ -146,7 +146,7 @@ const CurvedLoop = ({
           <path id={`${pathId}-measure`} d={pathD} />
         </defs>
         <text>
-          <textPath ref={measureRef} href={`#${pathId}-measure`}>
+          <textPath ref={measureRef as any} href={`#${pathId}-measure`}>
             {text}
           </textPath>
         </text>

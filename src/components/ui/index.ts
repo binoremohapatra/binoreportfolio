@@ -17,16 +17,12 @@ export { FaultLine } from './FaultLine';
 export type { FaultLineProps } from './FaultLine';
 
 // React Bits components (adapted to TypeScript)
-export { SplitText } from './SplitText';
-export { BlurText } from './BlurText';
+export { default as SplitText } from './reactbits/SplitText';
+export { default as BlurText } from './reactbits/BlurText';
 export { TextPressure } from './TextPressure';
 export { CircularText } from './CircularText';
 export { VariableProximity } from './VariableProximity';
 
 // Atlas UI components
-export { ShinyButton } from './shiny-button';
-export { HackerText } from './hacker-text';
-export { ProjectGallery, Project } from './project-gallery';
 export { ObserverSlider } from './observer-slider';
-export { GsapPlayground } from './gsap-playground';
 
