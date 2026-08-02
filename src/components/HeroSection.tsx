@@ -168,7 +168,7 @@ export default function HeroSection() {
           sticky={true}
           full={true}
           trackScroll={true}
-          transitionSpeed={12}
+          transitionSpeed={6}
           onChange={(percentage: number) => setScrollPercentage(percentage)}
         />
       </div>
