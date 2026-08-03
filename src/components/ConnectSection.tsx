@@ -198,11 +198,10 @@ export default function ConnectSection() {
   const footerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // 1. Setup video scrubbing
+    // 1. Setup video scrubbing and general scroll tracking
     const section = sectionRef.current;
-    const video = videoRef.current;
     
-    if (section && video) {
+    if (section) {
       // Create a timeline for tracking scroll progress
       const st = ScrollTrigger.create({
         trigger: section,
@@ -214,7 +213,8 @@ export default function ConnectSection() {
           setScrollPercentage(self.progress);
           
           // Scrub the video directly safely to prevent main-thread lockups
-          if (video.duration && video.readyState >= 2) {
+          const video = videoRef.current;
+          if (video && video.duration && video.readyState >= 2) {
             // Only seek if the video is not currently busy seeking, otherwise decoder hangs
             if (!video.seeking) {
               requestAnimationFrame(() => {
