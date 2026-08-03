@@ -213,10 +213,14 @@ export default function ConnectSection() {
           // Provide the scroll percentage to the rest of the component
           setScrollPercentage(self.progress);
           
-          // Scrub the video directly
-          if (video.duration) {
-            // Add a small bit of smoothing if you want, but direct mapping is 1:1
-            video.currentTime = self.progress * video.duration;
+          // Scrub the video directly safely to prevent main-thread lockups
+          if (video.duration && video.readyState >= 2) {
+            // Only seek if the video is not currently busy seeking, otherwise decoder hangs
+            if (!video.seeking) {
+              requestAnimationFrame(() => {
+                video.currentTime = self.progress * video.duration;
+              });
+            }
           }
         }
       });
