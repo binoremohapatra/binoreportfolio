@@ -330,9 +330,9 @@ export default function ProjectsOrbit() {
     if (!containerRef.current || !rotorRef.current) return;
 
     const totalCards = PROJECTS.length;
-    // Responsive radius: smaller on mobile for cards to fit in viewport
+    // Responsive radius: heavily increased on mobile so cards have room to breathe and don't overlap
     const vw = window.innerWidth;
-    const radius = vw < 640 ? 240 : vw < 1024 ? 440 : 1400;
+    const radius = vw < 640 ? 450 : vw < 1024 ? 650 : 1400;
     const angleIncrement = 360 / totalCards;
     const yStep = 480 / totalCards;
 

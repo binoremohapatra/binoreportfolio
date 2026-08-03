@@ -62,6 +62,8 @@ function FadeUp({ children, delay = 0, playKey = 0 }: { children: React.ReactNod
 export default function HeroSection() {
   const [scrollPercentage, setScrollPercentage] = useState(0);
 
+  const { tier } = useDeviceTier();
+
   // Track replays based on entering the scroll window
   const [animKeys, setAnimKeys] = useState({
     phase0: 1,
@@ -163,12 +165,12 @@ export default function HeroSection() {
       <div className="absolute inset-0 [&_canvas]:!object-cover [&_canvas]:!object-[75%_center] sm:[&_canvas]:!object-[right_center] [&_video]:!object-cover [&_video]:!object-[75%_center] sm:[&_video]:!object-[right_center]">
         <ScrollyVideo
           src="/videos/full_site_intro_sequence.mp4"
-          useWebCodecs={process.env.NODE_ENV === 'production'}
+          useWebCodecs={tier === 'HIGH' && process.env.NODE_ENV === 'production'}
           cover={true}
           sticky={true}
           full={true}
           trackScroll={true}
-          transitionSpeed={12}
+          transitionSpeed={tier === 'LOW' ? 4 : tier === 'MEDIUM' ? 8 : 12}
           onChange={(percentage: number) => setScrollPercentage(percentage)}
         />
       </div>

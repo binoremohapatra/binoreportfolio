@@ -63,6 +63,14 @@ function computeTier(): DeviceTierInfo {
 
   // 3. Viewport width as device-class proxy
   const vw = window.innerWidth;
+  const isTouchDevice = typeof window !== 'undefined' && ('ontouchstart' in window || (typeof navigator !== 'undefined' && navigator.maxTouchPoints > 0));
+
+  // Force LOW tier for all mobile phones to save battery and ensure smooth rendering
+  // regardless of how much RAM or CPU cores they have.
+  if (vw < 768) {
+    return { tier: 'LOW', isTouchDevice, prefersReducedMotion: false };
+  }
+
   if (vw < 768) lowVotes++;
   else if (vw < 1280) midVotes++;
   else highVotes++;

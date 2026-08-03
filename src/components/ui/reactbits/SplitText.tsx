@@ -56,12 +56,31 @@ const SplitText = ({
   }, [onLetterAnimationComplete]);
 
   useEffect(() => {
-    if (document.fonts.status === "loaded") {
-      setFontsLoaded(true);
+    let isMounted = true;
+    if (typeof document !== 'undefined' && document.fonts) {
+      if (document.fonts.status === "loaded") {
+        setFontsLoaded(true);
+      } else {
+        document.fonts.ready.then(() => {
+          if (isMounted) setFontsLoaded(true);
+        }).catch(() => {
+          if (isMounted) setFontsLoaded(true);
+        });
+      }
     } else {
-      document.fonts.ready.then(() => setFontsLoaded(true));
+      setFontsLoaded(true);
     }
-  }, []);
+
+    // Fallback timeout in case font API hangs (common on some mobile browsers)
+    const timeout = setTimeout(() => {
+      if (isMounted && !fontsLoaded) setFontsLoaded(true);
+    }, 600);
+
+    return () => {
+      isMounted = false;
+      clearTimeout(timeout);
+    };
+  }, [fontsLoaded]);
 
   useGSAP(
     () => {
