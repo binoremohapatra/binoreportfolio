@@ -606,18 +606,6 @@ function ExperienceCard({ node, pos, index, isMobile, setTextBlockRef }: any) {
           }}
         />
 
-        {/* 2. VISIBLE SIDE-EDGE STRIPS (Forms the 3D sides) */}
-        {/* Right Edge Strip */}
-        <div 
-          className="absolute top-[4px] -right-[8px] bottom-[-4px] w-[8px] bg-[#090a0c] pointer-events-none"
-          style={{ transform: 'skewY(45deg)', transformOrigin: 'top left', opacity: isMobile ? 0 : 1 }}
-        />
-        {/* Bottom Edge Strip */}
-        <div 
-          className="absolute -bottom-[8px] left-[4px] right-[-4px] h-[8px] bg-[#050607] pointer-events-none"
-          style={{ transform: 'skewX(45deg)', transformOrigin: 'top left', opacity: isMobile ? 0 : 1 }}
-        />
-
         {/* Connector dot - embedded in the top-left/right gap */}
         <div 
           className={`absolute -top-1 w-2 h-2 rounded-full bg-[#d97757] shadow-[0_0_10px_rgba(217,119,87,0.8)] ${
