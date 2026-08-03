@@ -559,10 +559,7 @@ function ProjectsOrbit3D() {
       className="relative h-screen w-full overflow-hidden bg-[#a8adac] text-gray-900 flex items-center justify-center scroll-touch-fix"
       style={{ perspective: tier === 'low' ? '2000px' : '4000px' }}
     >
-      {/* DEBUG INDICATOR - TEMPORARY */}
-      <div className="absolute top-24 left-4 z-[9999] bg-red-600 text-white text-xs p-2 font-mono rounded font-bold">
-        TIER: {tier} | {debugInfo}
-      </div>
+
 
       {/* Grain overlay (Disabled on LOW tier as SVG filters are expensive on mobile GPUs) */}
       {tier !== 'low' && (
