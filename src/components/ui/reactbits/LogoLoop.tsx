@@ -47,8 +47,9 @@ export default function LogoLoop({
   showLabels = true,
   ariaLabel = 'Logo marquee',
 }: LogoLoopProps) {
-  // Duplicate logos to create seamless infinite loop
-  const items = [...logos, ...logos];
+  // 4 copies ensures the strip is always wider than any screen size
+  // CSS animation translates by -50% = exactly 2 sets, creating a seamless loop
+  const items = [...logos, ...logos, ...logos, ...logos];
 
   return (
     <div
