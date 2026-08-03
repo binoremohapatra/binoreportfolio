@@ -7,7 +7,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import * as THREE from 'three';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { Landmark, MessageSquare, Building2, BookOpen, ShieldCheck, Code2, Bot } from 'lucide-react';
-import { useDeviceTier, type DeviceTier } from '@/hooks/useDeviceTier';
+import { useAdaptiveQuality } from '@/hooks/useAdaptiveQuality';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -150,12 +150,12 @@ const PROJECTS = [
 // 3D DNA Helix — rendered via React Three Fiber.
 // ---------------------------------------------------------------------------
 
-function DnaWrapper({ tier }: { tier: DeviceTier }) {
+function DnaWrapper({ tier, allowWebGL }: { tier: string; allowWebGL: boolean }) {
   const [webglSupported, setWebglSupported] = useState<boolean | null>(null);
 
   useEffect(() => {
-    // LOW tier: skip WebGL entirely, use SVG fallback
-    if (tier === 'LOW') {
+    // low tier or no WebGL flag: skip WebGL entirely, use SVG fallback
+    if (!allowWebGL) {
       setWebglSupported(false);
       return;
     }
@@ -166,7 +166,7 @@ function DnaWrapper({ tier }: { tier: DeviceTier }) {
     } catch (e) {
       setWebglSupported(false);
     }
-  }, [tier]);
+  }, [allowWebGL]);
 
   if (webglSupported === null) {
     return <div className="absolute inset-0 pointer-events-none z-0 opacity-80" />;
@@ -324,7 +324,10 @@ export default function ProjectsOrbit() {
   const dnaContainerRef = useRef<HTMLDivElement>(null);
   const activeIndexRef = useRef<number>(0);
   const [activeCardIndex, setActiveCardIndex] = useState(0);
-  const { tier, isTouchDevice, prefersReducedMotion } = useDeviceTier();
+  const { tier, allowWebGL, allowLiveIframes } = useAdaptiveQuality();
+  // Derive helpers from tier string (isTouchDevice and prefersReducedMotion still useful for animation)
+  const isTouchDevice = typeof window !== 'undefined' && ('ontouchstart' in window || navigator.maxTouchPoints > 0);
+  const prefersReducedMotion = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   useEffect(() => {
     if (!containerRef.current || !rotorRef.current) return;
@@ -358,7 +361,7 @@ export default function ProjectsOrbit() {
         trigger: containerRef.current,
         start: 'top top',
         end: `+=${totalCards * 350}`,
-        scrub: tier === 'LOW' ? 2.5 : 1.2, // increased smoothing on LOW tier to absorb frame drops
+        scrub: tier === 'low' ? 2.5 : 1.2,
         pin: true,
         onUpdate: (self) => {
           try {
@@ -384,7 +387,7 @@ export default function ProjectsOrbit() {
               const card = cardEls[i];
               if (!card) continue;
 
-              if (tier === 'LOW') {
+              if (tier === 'low') {
                 if (diff >= 45) {
                   // Only set it once when it crosses the threshold to avoid redundant GSAP sets per frame
                   if (!card.dataset.isFar) {
@@ -447,7 +450,7 @@ export default function ProjectsOrbit() {
     // Idle float — cheap, transform-only, GPU composited
     // Disabled on LOW tier and when user prefers reduced motion
     let floatAnim: gsap.core.Tween | null = null;
-    if (tier !== 'LOW' && !prefersReducedMotion) {
+    if (tier !== 'low' && !prefersReducedMotion) {
       floatAnim = gsap.to(cardEls, {
         y: '+=10',
         rotationZ: () => Math.random() * 2 - 1,
@@ -477,7 +480,7 @@ export default function ProjectsOrbit() {
       id="projects"
       ref={containerRef}
       className="relative h-screen w-full overflow-hidden bg-[#a8adac] text-gray-900 flex items-center justify-center scroll-touch-fix"
-      style={{ perspective: tier === 'LOW' ? '2000px' : '4000px' }}
+      style={{ perspective: tier === 'low' ? '2000px' : '4000px' }}
     >
       {/* DEBUG INDICATOR - TEMPORARY */}
       <div className="absolute top-24 left-4 z-[9999] bg-red-600 text-white text-xs p-2 font-mono rounded font-bold">
@@ -485,7 +488,7 @@ export default function ProjectsOrbit() {
       </div>
 
       {/* Grain overlay (Disabled on LOW tier as SVG filters are expensive on mobile GPUs) */}
-      {tier !== 'LOW' && (
+      {tier !== 'low' && (
         <div className="absolute inset-0 z-0 pointer-events-none mix-blend-overlay opacity-10">
           <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
             <filter id="projectsNoiseFilter">
@@ -503,7 +506,7 @@ export default function ProjectsOrbit() {
       >
         {/* Constrain to the size of the active card preview so it doesn't clip other cards */}
         <div className="relative flex items-center justify-center w-screen h-screen">
-          <DnaWrapper tier={tier} />
+          <DnaWrapper tier={tier} allowWebGL={allowWebGL} />
         </div>
       </div>
 
@@ -529,7 +532,7 @@ export default function ProjectsOrbit() {
             {/* Full-bleed preview fills the whole card */}
             <div className="absolute inset-0 z-0">
               {project.link ? (
-                i === activeCardIndex && !(project as any).iframeDisabled && tier === 'HIGH' ? (
+                i === activeCardIndex && !(project as any).iframeDisabled && allowLiveIframes ? (
                   <ActiveOnlyIframe url={project.link} />
                 ) : (
                   // eslint-disable-next-line @next/next/no-img-element

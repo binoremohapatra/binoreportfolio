@@ -30,7 +30,7 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { MessageCircle } from 'lucide-react';
 import { EncryptedText } from '@/components/ui/encrypted-text';
-import { useDeviceTier } from '@/hooks/useDeviceTier';
+import { useAdaptiveQuality } from '@/hooks/useAdaptiveQuality';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -247,7 +247,7 @@ export default function ConnectSection() {
   const [scrollPercentage, setScrollPercentage] = useState(0);
   const sectionRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const { tier } = useDeviceTier();
+  const { tier, allowScrollScrub, isReady } = useAdaptiveQuality();
 
   // Phase keys — same pattern as Hero (re-triggers animation on entering window)
   const [animKeys, setAnimKeys] = useState({
@@ -272,8 +272,8 @@ export default function ConnectSection() {
   const footerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // LOW tier: no scroll dependency — will use IntersectionObserver instead
-    if (tier === 'LOW') return;
+    // LOW tier: no scroll dependency
+    if (tier === 'low' || !isReady) return;
 
     // 1. Setup video scrubbing and general scroll tracking
     const section = sectionRef.current;
@@ -289,7 +289,7 @@ export default function ConnectSection() {
           // Provide the scroll percentage to the rest of the component
           setScrollPercentage(self.progress);
           
-          if (tier === 'HIGH') {
+          if (tier === 'high') {
             // Scrub the video directly safely to prevent main-thread lockups
             const video = videoRef.current;
             if (video && video.duration && video.readyState >= 2) {
@@ -309,7 +309,7 @@ export default function ConnectSection() {
         st.kill();
       };
     }
-  }, [tier]);
+  }, [tier, isReady]);
 
   useEffect(() => {
     // 2. Handle text/opacity animations based on scrollPercentage
@@ -364,7 +364,7 @@ export default function ConnectSection() {
   }, [scrollPercentage]);
 
   // ── LOW tier: simple static section with IntersectionObserver-based reveal ──
-  if (tier === 'LOW') {
+  if (tier === 'low' || !isReady) {
     return (
       <LowTierConnectSection
         animKeys={animKeys}
@@ -455,7 +455,7 @@ export default function ConnectSection() {
       {/* ── Background Video Container ── */}
       <div className="absolute inset-0 z-0 pointer-events-none hidden sm:block">
         <div className="sticky top-0 w-full h-screen overflow-hidden">
-          {tier === 'HIGH' ? (
+          {tier === 'high' ? (
             <video
               ref={videoRef}
               src="/videos/hands-connect-final2.mp4"
@@ -464,7 +464,7 @@ export default function ConnectSection() {
               playsInline
               preload="auto"
             />
-          ) : tier === 'MEDIUM' ? (
+          ) : tier === 'medium' ? (
             <video
               src="/videos/hands-connect-final2.mp4"
               className="w-full h-full object-cover"

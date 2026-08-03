@@ -7,8 +7,7 @@ import BlurText from '@/components/ui/reactbits/BlurText';
 import TextType from '@/components/ui/reactbits/TextType';
 // @ts-ignore
 import ScrollyVideo from 'scrolly-video/dist/ScrollyVideo.esm.jsx';
-import { useDeviceTier } from '@/hooks/useDeviceTier';
-
+import { useAdaptiveQuality } from '@/hooks/useAdaptiveQuality';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -68,32 +67,30 @@ export default function HeroSection() {
   const [scrollPercentage, setScrollPercentage] = useState(0);
   const sectionRef = useRef<HTMLDivElement>(null);
 
-  const { tier } = useDeviceTier();
+  const { tier, allowScrollScrub, isReady } = useAdaptiveQuality();
 
   useEffect(() => {
-    // LOW tier: section is 100vh with no scroll — immediately show everything at p=1
-    if (tier === 'LOW') {
-      setScrollPercentage(0.5); // mid-point so phase0 content is fully visible
+    // 'high' + allowScrollScrub: ScrollyVideo's own onChange drives scrollPercentage.
+    if (tier === 'high' && allowScrollScrub) return;
+
+    // 'low': section is 100vh — set to mid-point so phase0 text is visible
+    if (tier === 'low') {
+      setScrollPercentage(0.5);
       return;
     }
 
-    // HIGH tier: ScrollyVideo handles scroll tracking natively via onChange.
-    if (tier === 'HIGH') return;
-
-    // MEDIUM tier: manual ScrollTrigger since looping <video> has no onChange.
+    // 'medium': manual ScrollTrigger (looping video has no onChange callback)
     if (sectionRef.current) {
       const st = ScrollTrigger.create({
         trigger: sectionRef.current,
         start: 'top top',
         end: 'bottom bottom',
         scrub: true,
-        onUpdate: (self) => {
-          setScrollPercentage(self.progress);
-        }
+        onUpdate: (self) => setScrollPercentage(self.progress),
       });
       return () => st.kill();
     }
-  }, [tier]);
+  }, [tier, allowScrollScrub]);
 
   // Track replays based on entering the scroll window
   const [animKeys, setAnimKeys] = useState({
@@ -189,21 +186,26 @@ export default function HeroSection() {
 
   }, [scrollPercentage, animKeys]);
 
-  // LOW tier: simple static 100vh section — no scroll dependency
-  if (tier === 'LOW') {
+  // LOW tier or not-yet-ready: simple static 100vh section — no scroll, no video decode
+  if (tier === 'low' || !isReady) {
     return (
       <div className="relative w-full h-screen flex items-center" style={{ background: '#0d0f12' }}>
-        {/* Static paused video background */}
-        <video
-          src="/videos/full_site_intro_sequence.mp4#t=3"
-          className="absolute inset-0 w-full h-full object-cover object-[75%_center]"
-          muted playsInline preload="metadata"
-        />
-        {/* Gradient overlay */}
-        <div className="absolute inset-0" style={{ background: 'linear-gradient(to right, rgba(13,15,18,0.85) 0%, rgba(13,15,18,0.5) 55%, rgba(13,15,18,0) 80%)' }} />
-        {/* Static text — no scrollPercentage needed */}
+        {/* Static paused video background — only loads metadata, not full video */}
+        {isReady && (
+          <video
+            src="/videos/full_site_intro_sequence.mp4#t=3"
+            className="absolute inset-0 w-full h-full object-cover object-[75%_center]"
+            muted playsInline preload="metadata"
+          />
+        )}
+        {/* Dark gradient overlay */}
+        <div className="absolute inset-0" style={{ background: 'linear-gradient(to right, rgba(13,15,18,0.9) 0%, rgba(13,15,18,0.6) 55%, rgba(13,15,18,0.1) 80%)' }} />
+        {/* Static text — visible immediately, zero scroll dependency */}
         <div className="relative z-10 px-8 sm:px-12 max-w-xl">
-          <h1 className="flex flex-wrap items-center gap-4 text-5xl sm:text-7xl font-bold tracking-tighter mb-4" style={{ fontFamily: 'var(--font-mono, monospace)', textShadow: '0 4px 24px rgba(0,0,0,0.6)' }}>
+          <h1
+            className="flex flex-wrap items-center gap-4 font-bold tracking-tighter mb-4"
+            style={{ fontFamily: 'var(--font-mono, monospace)', textShadow: '0 4px 24px rgba(0,0,0,0.6)', fontSize: 'clamp(40px, 10vw, 72px)' }}
+          >
             <span className="text-white">BINORE</span>
             <span className="text-[#d97757]">MOHAPATRA</span>
           </h1>
@@ -219,12 +221,11 @@ export default function HeroSection() {
   }
 
   return (
-    <div ref={sectionRef} className="relative w-full" style={{ height: tier === 'MEDIUM' ? '830vh' : '830vh', background: '#0d0f12' }}>
-      
-      {/* ── Background Video Container ── */}
-      {/* Target canvas/video to be right-weighted to fix framing issues where subject overlaps text */}
+    <div ref={sectionRef} className="relative w-full" style={{ height: '830vh', background: '#0d0f12' }}>
+
+      {/* ── Background Video ── */}
       <div className="absolute inset-0 [&_canvas]:!object-cover [&_canvas]:!object-[75%_center] sm:[&_canvas]:!object-[right_center] [&_video]:!object-cover [&_video]:!object-[75%_center] sm:[&_video]:!object-[right_center]">
-        {tier === 'HIGH' ? (
+        {tier === 'high' ? (
           <ScrollyVideo
             src="/videos/full_site_intro_sequence.mp4"
             useWebCodecs={process.env.NODE_ENV === 'production'}
@@ -236,15 +237,12 @@ export default function HeroSection() {
             onChange={(percentage: number) => setScrollPercentage(percentage)}
           />
         ) : (
-          /* MEDIUM: looping video — text phases driven by scroll via ScrollTrigger */
+          /* medium: looping video — text phases driven by manual ScrollTrigger */
           <div className="sticky top-0 w-full h-screen overflow-hidden">
             <video
               src="/videos/full_site_intro_sequence.mp4"
               className="w-full h-full object-cover object-[75%_center] sm:object-[right_center]"
-              autoPlay
-              loop
-              muted
-              playsInline
+              autoPlay loop muted playsInline
             />
           </div>
         )}
