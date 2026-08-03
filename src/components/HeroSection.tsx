@@ -27,18 +27,33 @@ const getTransform = (p: number, enterStart: number, enterEnd: number, exitStart
   return { opacity: op, y: 0 };
 };
 
-function HeroStatText({ value, label, className = "", accentColor = "white" }: { value: string, label: string, className?: string, accentColor?: string }) {
+function HeroStatText({ value, label, className = "", accentColor = "#d97757", playKey = 0, delay = 0 }: { value: string, label: string, className?: string, accentColor?: string, playKey?: number, delay?: number }) {
+  const valRef = useRef<HTMLSpanElement>(null);
+  const sepRef = useRef<HTMLSpanElement>(null);
+  const lblRef = useRef<HTMLSpanElement>(null);
+  
+  useEffect(() => {
+    if (playKey > 0 && valRef.current && sepRef.current && lblRef.current) {
+      gsap.killTweensOf([valRef.current, sepRef.current, lblRef.current]);
+      gsap.fromTo(valRef.current, { opacity: 0, y: 15 }, { opacity: 1, y: 0, duration: 0.8, delay: delay / 1000, ease: 'power3.out' });
+      gsap.fromTo(sepRef.current, { opacity: 0, y: 15 }, { opacity: 1, y: 0, duration: 0.8, delay: (delay + 150) / 1000, ease: 'power3.out' });
+      gsap.fromTo(lblRef.current, { opacity: 0, y: 15 }, { opacity: 1, y: 0, duration: 0.8, delay: (delay + 300) / 1000, ease: 'power3.out' });
+    }
+  }, [playKey, delay]);
+
   return (
     <div className={`flex flex-wrap items-center gap-3 sm:gap-5 pointer-events-auto ${className}`}>
       <span 
+        ref={valRef}
         className="text-[16px] sm:text-[22px] font-bold tracking-tight" 
         style={{ fontFamily: 'var(--font-mono, monospace)', textShadow: '0 4px 20px rgba(0,0,0,0.9)', color: accentColor }}
       >
         {value}
       </span>
-      <span className="text-white/20 text-[18px] sm:text-[22px] font-mono leading-none hidden sm:inline">|</span>
+      <span ref={sepRef} className="text-white/20 text-[18px] sm:text-[22px] font-mono leading-none hidden sm:inline">|</span>
       <span 
-        className="text-[11px] sm:text-[13px] uppercase tracking-[0.2em] text-white/90 font-sans font-bold" 
+        ref={lblRef}
+        className="text-[11px] sm:text-[13px] uppercase tracking-[0.2em] text-white/90 font-mono font-bold" 
         style={{ textShadow: '0 4px 20px rgba(0,0,0,0.9)' }}
       >
         {label}
@@ -47,17 +62,17 @@ function HeroStatText({ value, label, className = "", accentColor = "white" }: {
   );
 }
 
-function FadeUp({ children, delay = 0, playKey = 0 }: { children: React.ReactNode, delay?: number, playKey?: number }) {
+function FadeUp({ children, delay = 0, playKey = 0, fast = false }: { children: React.ReactNode, delay?: number, playKey?: number, fast?: boolean }) {
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (playKey > 0 && ref.current) {
       gsap.killTweensOf(ref.current);
       gsap.fromTo(ref.current,
         { opacity: 0, y: 25 },
-        { opacity: 1, y: 0, duration: 1, delay: delay / 1000, ease: 'power3.out' }
+        { opacity: 1, y: 0, duration: fast ? 0.4 : 1, delay: delay / 1000, ease: 'power3.out' }
       );
     }
-  }, [playKey, delay]);
+  }, [playKey, delay, fast]);
 
   return <div ref={ref} style={{ opacity: playKey > 0 ? 1 : 0 }}>{children}</div>;
 }
@@ -219,7 +234,7 @@ export default function HeroSection() {
                     delay={40}
                     animateBy="letters"
                     direction="top"
-                    className="text-white"
+                    className="text-white font-mono"
                   />
                   <BlurText
                     key={`p0-2-${animKeys.phase0}`}
@@ -227,7 +242,7 @@ export default function HeroSection() {
                     delay={40}
                     animateBy="letters"
                     direction="top"
-                    className="text-[#d97757]"
+                    className="text-[#d97757] font-mono"
                   />
                 </h1>
                 {animKeys.phase0 > 0 && (
@@ -287,17 +302,12 @@ export default function HeroSection() {
                   }}
                 >
                   {animKeys.phase2 > 0 && (
-                    <SplitText
+                    <BlurText
                       key={`p2-${animKeys.phase2}`}
                       text="Building Systems That Ship."
-                      delay={40}
-                      duration={1.2}
-                      ease="power3.out"
-                      splitType="chars"
-                      from={{ opacity: 0, y: 30 }}
-                      to={{ opacity: 1, y: 0 }}
-                      tag="h1"
-                      textAlign="left"
+                      delay={35}
+                      animateBy="letters"
+                      direction="top"
                     />
                   )}
                 </div>
@@ -351,16 +361,18 @@ export default function HeroSection() {
 
               {/* PHASE 6: WHO I AM */}
               <div ref={whoRef} className="absolute inset-0 flex flex-col justify-center pointer-events-none opacity-0">
-                <p
-                  className="text-[12px] uppercase tracking-[0.3em] font-bold text-[#d97757] mb-3"
-                  style={{ fontFamily: 'var(--font-mono, monospace)', textShadow: '0 2px 12px rgba(0,0,0,0.8)' }}
-                >
-                  WHO I AM
-                </p>
+                <FadeUp playKey={animKeys.phase6} delay={0} fast={true}>
+                  <p
+                    className="text-[12px] uppercase tracking-[0.3em] font-bold text-[#d97757] mb-3"
+                    style={{ fontFamily: 'var(--font-mono, monospace)', textShadow: '0 2px 12px rgba(0,0,0,0.8)' }}
+                  >
+                    WHO I AM
+                  </p>
+                </FadeUp>
                 <div
                   className="leading-[1.1] tracking-tight"
                   style={{
-                    fontFamily: 'var(--font-sans, "Inter", sans-serif)',
+                    fontFamily: 'var(--font-mono, monospace)',
                     fontSize: 'clamp(32px, 5vw, 56px)',
                     color: '#ffffff',
                     fontWeight: 700,
@@ -368,15 +380,12 @@ export default function HeroSection() {
                   }}
                 >
                   {animKeys.phase6 > 0 && (
-                    <SplitText
+                    <BlurText
                       key={`p6-${animKeys.phase6}`}
                       text="I am a Full-Stack Developer."
                       delay={30}
-                      duration={1.0}
-                      ease="power3.out"
-                      splitType="words"
-                      from={{ opacity: 0, y: 20 }}
-                      to={{ opacity: 1, y: 0 }}
+                      animateBy="letters"
+                      direction="top"
                     />
                   )}
                 </div>
@@ -384,16 +393,18 @@ export default function HeroSection() {
 
               {/* PHASE 7: CURRENT WORK */}
               <div ref={workRef} className="absolute inset-0 flex flex-col justify-center pointer-events-none opacity-0">
-                <p
-                  className="text-[12px] uppercase tracking-[0.3em] font-bold text-[#2dd4bf] mb-3"
-                  style={{ fontFamily: 'var(--font-mono, monospace)', textShadow: '0 2px 12px rgba(0,0,0,0.8)' }}
-                >
-                  CURRENT WORK
-                </p>
+                <FadeUp playKey={animKeys.phase7} delay={0} fast={true}>
+                  <p
+                    className="text-[12px] uppercase tracking-[0.3em] font-bold text-[#d97757] mb-3"
+                    style={{ fontFamily: 'var(--font-mono, monospace)', textShadow: '0 2px 12px rgba(0,0,0,0.8)' }}
+                  >
+                    CURRENT WORK
+                  </p>
+                </FadeUp>
                 <div
                   className="leading-[1.15] tracking-tight"
                   style={{
-                    fontFamily: 'var(--font-sans, "Inter", sans-serif)',
+                    fontFamily: 'var(--font-mono, monospace)',
                     fontSize: 'clamp(28px, 4.5vw, 48px)',
                     color: '#ffffff',
                     fontWeight: 700,
@@ -401,15 +412,12 @@ export default function HeroSection() {
                   }}
                 >
                   {animKeys.phase7 > 0 && (
-                    <SplitText
+                    <BlurText
                       key={`p7-${animKeys.phase7}`}
                       text="Interning simultaneously at OM Associates & Suvidha Mahila Mandal."
-                      delay={30}
-                      duration={1.0}
-                      ease="power3.out"
-                      splitType="words"
-                      from={{ opacity: 0, y: 20 }}
-                      to={{ opacity: 1, y: 0 }}
+                      delay={20}
+                      animateBy="letters"
+                      direction="top"
                     />
                   )}
                 </div>
@@ -417,16 +425,18 @@ export default function HeroSection() {
 
               {/* PHASE 8: PHILOSOPHY */}
               <div ref={philRef} className="absolute inset-0 flex flex-col justify-center pointer-events-none opacity-0">
-                <p
-                  className="text-[12px] uppercase tracking-[0.3em] font-bold text-[#d97757] mb-3"
-                  style={{ fontFamily: 'var(--font-mono, monospace)', textShadow: '0 2px 12px rgba(0,0,0,0.8)' }}
-                >
-                  PHILOSOPHY
-                </p>
+                <FadeUp playKey={animKeys.phase8} delay={0} fast={true}>
+                  <p
+                    className="text-[12px] uppercase tracking-[0.3em] font-bold text-[#d97757] mb-3"
+                    style={{ fontFamily: 'var(--font-mono, monospace)', textShadow: '0 2px 12px rgba(0,0,0,0.8)' }}
+                  >
+                    PHILOSOPHY
+                  </p>
+                </FadeUp>
                 <div
                   className="leading-[1.1] tracking-tight"
                   style={{
-                    fontFamily: 'var(--font-sans, "Inter", sans-serif)',
+                    fontFamily: 'var(--font-mono, monospace)',
                     fontSize: 'clamp(32px, 5vw, 56px)',
                     color: '#ffffff',
                     fontWeight: 700,
@@ -434,15 +444,12 @@ export default function HeroSection() {
                   }}
                 >
                   {animKeys.phase8 > 0 && (
-                    <SplitText
+                    <BlurText
                       key={`p8-${animKeys.phase8}`}
                       text="Full-stack systems, built to actually ship."
-                      delay={30}
-                      duration={1.0}
-                      ease="power3.out"
-                      splitType="words"
-                      from={{ opacity: 0, y: 20 }}
-                      to={{ opacity: 1, y: 0 }}
+                      delay={40}
+                      animateBy="letters"
+                      direction="top"
                     />
                   )}
                 </div>
@@ -453,7 +460,7 @@ export default function HeroSection() {
                 <div
                   className="leading-[1.1] tracking-tight"
                   style={{
-                    fontFamily: 'var(--font-sans, "Inter", sans-serif)',
+                    fontFamily: 'var(--font-mono, monospace)',
                     fontSize: 'clamp(32px, 5vw, 56px)',
                     color: '#ffffff',
                     fontWeight: 700,
@@ -461,15 +468,12 @@ export default function HeroSection() {
                   }}
                 >
                   {animKeys.phase9 > 0 && (
-                    <SplitText
+                    <BlurText
                       key={`p9-${animKeys.phase9}`}
                       text="Here's what that looks like in practice."
-                      delay={30}
-                      duration={1.0}
-                      ease="power3.out"
-                      splitType="words"
-                      from={{ opacity: 0, y: 20 }}
-                      to={{ opacity: 1, y: 0 }}
+                      delay={25}
+                      animateBy="letters"
+                      direction="top"
                     />
                   )}
                 </div>
@@ -484,42 +488,38 @@ export default function HeroSection() {
             
             {/* Left Stats Column */}
             <div className="flex flex-col items-start gap-4">
-              <FadeUp playKey={animKeys.phase5} delay={0}>
-                <HeroStatText
-                  value="10+ Projects Shipped"
-                  label="All documented on GitHub"
-                  className="justify-start"
-                  accentColor="#2dd4bf"
-                />
-              </FadeUp>
-              <FadeUp playKey={animKeys.phase5} delay={40}>
-                <HeroStatText
-                  value="8.07 CGPA"
-                  label="B.Tech CSE, GGSIPU Delhi"
-                  className="justify-start"
-                  accentColor="#2dd4bf"
-                />
-              </FadeUp>
+              <HeroStatText
+                value="10+ Projects Shipped"
+                label="All documented on GitHub"
+                className="justify-start"
+                playKey={animKeys.phase5}
+                delay={0}
+              />
+              <HeroStatText
+                value="8.07 CGPA"
+                label="B.Tech CSE, GGSIPU Delhi"
+                className="justify-start"
+                playKey={animKeys.phase5}
+                delay={400}
+              />
             </div>
 
             {/* Right Stats Column */}
             <div className="flex flex-col items-start sm:items-end gap-5">
-              <FadeUp playKey={animKeys.phase5} delay={80}>
-                <HeroStatText
-                  value="Class of '28 · B.Tech CSE"
-                  label="Expected Graduation"
-                  className="justify-start sm:justify-end"
-                  accentColor="#d97757"
-                />
-              </FadeUp>
-              <FadeUp playKey={animKeys.phase5} delay={160}>
-                <HeroStatText
-                  value="2 Live Internships"
-                  label="OM Associates • Suvidha Mahila Mandal"
-                  className="justify-start sm:justify-end"
-                  accentColor="#3b82f6"
-                />
-              </FadeUp>
+              <HeroStatText
+                value="Class of '28 · B.Tech CSE"
+                label="Expected Graduation"
+                className="justify-start sm:justify-end"
+                playKey={animKeys.phase5}
+                delay={800}
+              />
+              <HeroStatText
+                value="2 Live Internships"
+                label="OM Associates • Suvidha Mahila Mandal"
+                className="justify-start sm:justify-end"
+                playKey={animKeys.phase5}
+                delay={1200}
+              />
             </div>
           </div>
 
