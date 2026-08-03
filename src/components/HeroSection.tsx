@@ -4,6 +4,7 @@ import React, { useRef, useState, useEffect } from 'react';
 import gsap from 'gsap';
 import BlurText from '@/components/ui/reactbits/BlurText';
 import ScrollReveal from '@/components/ui/reactbits/ScrollReveal';
+import SplitText from '@/components/ui/reactbits/SplitText';
 // @ts-ignore
 import ScrollyVideo from 'scrolly-video/dist/ScrollyVideo.esm.jsx';
 import { useAdaptiveQuality } from '@/hooks/useAdaptiveQuality';
