@@ -1,0 +1,111 @@
+.logoloop {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+}
+
+/* Fade-out edge masks — color controlled via CSS custom property */
+.logoloop::before,
+.logoloop::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 120px;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.logoloop::before {
+  left: 0;
+  background: linear-gradient(to right, var(--logoloop-fade-color, #ffffff) 0%, transparent 100%);
+}
+
+.logoloop::after {
+  right: 0;
+  background: linear-gradient(to left, var(--logoloop-fade-color, #ffffff) 0%, transparent 100%);
+}
+
+.logoloop__track {
+  display: flex;
+  align-items: center;
+  width: max-content;
+}
+
+.logoloop__track--left {
+  animation: logoloop-scroll-left var(--logoloop-duration, 30s) linear infinite;
+}
+
+.logoloop__track--right {
+  animation: logoloop-scroll-right var(--logoloop-duration, 30s) linear infinite;
+}
+
+.logoloop__track:hover {
+  animation-play-state: paused;
+}
+
+@keyframes logoloop-scroll-left {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+@keyframes logoloop-scroll-right {
+  from { transform: translateX(-50%); }
+  to   { transform: translateX(0); }
+}
+
+.logoloop__item {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  cursor: default;
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  flex-shrink: 0;
+}
+
+.logoloop__item a {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  color: inherit;
+}
+
+.logoloop__item:hover {
+  transform: scale(1.18);
+}
+
+.logoloop__item svg {
+  transition: color 0.3s ease;
+  display: block;
+}
+
+.logoloop__item:hover svg {
+  color: #d97757;
+}
+
+.logoloop__item span {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-family: var(--font-mono, monospace);
+  opacity: 0.5;
+  transition: opacity 0.3s ease, color 0.3s ease;
+  white-space: nowrap;
+}
+
+.logoloop__item:hover span {
+  opacity: 1;
+  color: #d97757;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .logoloop__track--left,
+  .logoloop__track--right {
+    animation: none;
+  }
+}

@@ -1,8 +1,33 @@
 import HeroSection from '@/components/HeroSection';
-import ScrollVelocity from '@/components/ui/reactbits/ScrollVelocity';
+import LogoLoop from '@/components/ui/reactbits/LogoLoop';
 import ExperienceConnector from '@/components/ExperienceConnector';
 import ProjectsOrbit from '@/components/ProjectsOrbit';
 import ConnectSection from '@/components/ConnectSection';
+import {
+  SiReact,
+  SiNextdotjs,
+  SiTypescript,
+  SiTailwindcss,
+  SiNodedotjs,
+  SiSpringboot,
+  SiPostgresql,
+  SiDocker,
+  SiFlutter,
+  SiVercel,
+} from 'react-icons/si';
+
+const techLogos = [
+  { node: <SiReact />,      title: 'React',        href: 'https://react.dev' },
+  { node: <SiNextdotjs />,  title: 'Next.js',      href: 'https://nextjs.org' },
+  { node: <SiTypescript />, title: 'TypeScript',   href: 'https://www.typescriptlang.org' },
+  { node: <SiTailwindcss />,title: 'Tailwind CSS', href: 'https://tailwindcss.com' },
+  { node: <SiNodedotjs />,  title: 'Node.js',      href: 'https://nodejs.org' },
+  { node: <SiSpringboot />, title: 'Spring Boot',  href: 'https://spring.io/projects/spring-boot' },
+  { node: <SiPostgresql />, title: 'PostgreSQL',   href: 'https://www.postgresql.org' },
+  { node: <SiDocker />,     title: 'Docker',       href: 'https://www.docker.com' },
+  { node: <SiFlutter />,    title: 'Flutter',      href: 'https://flutter.dev' },
+  { node: <SiVercel />,     title: 'Vercel',       href: 'https://vercel.com' },
+];
 
 function FixedGrain() {
   return (
@@ -50,14 +75,24 @@ export default function Home() {
           <div className="w-24 h-1 bg-[#d97757] mx-auto mt-6 rounded-full" />
         </div>
 
-        <div className="flex flex-col gap-6">
-          <ScrollVelocity
-            texts={[
-              'React ✦ Next.js ✦ TypeScript ✦ Tailwind CSS ✦ Framer Motion ✦',
-              'Node.js ✦ Express.js ✦ Spring Boot ✦ PostgreSQL ✦ Docker ✦'
-            ]}
-            velocity={60}
-            className="text-gray-900 hover:text-black transition-colors cursor-default drop-shadow-sm"
+        {/* LogoLoop Marquee — tech brand icons */}
+        <div
+          style={{
+            // All icons render as monochrome dark silhouettes at rest;
+            // hover state transitions them to the orange accent via .logoloop__item:hover svg
+            color: '#181a1b',
+          }}
+        >
+          <LogoLoop
+            logos={techLogos}
+            speed={90}
+            direction="left"
+            logoHeight={40}
+            gap={56}
+            fadeOut
+            fadeOutColor="#a8adac"
+            showLabels
+            ariaLabel="Core tech stack"
           />
         </div>
       </section>
