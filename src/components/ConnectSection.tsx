@@ -30,6 +30,7 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { MessageCircle } from 'lucide-react';
 import { EncryptedText } from '@/components/ui/encrypted-text';
+import { useDeviceTier } from '@/hooks/useDeviceTier';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -169,11 +170,84 @@ function SocialLink({
   );
 }
 
+// ─── LOW tier fallback: simple static layout, IntersectionObserver-driven ─────
+function LowTierConnectSection({ SOCIAL_LINKS }: { animKeys: any, setAnimKeys: any, SOCIAL_LINKS: Record<string, string> }) {
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    if (!sectionRef.current) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) setVisible(true); },
+      { threshold: 0.1 }
+    );
+    observer.observe(sectionRef.current);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <div
+      id="connect"
+      ref={sectionRef}
+      className="relative w-full min-h-screen flex flex-col items-center justify-center gap-12 px-8 py-24"
+      style={{ background: 'linear-gradient(to bottom, #0d0f12, #111315)' }}
+    >
+      {/* Top accent */}
+      <div className="absolute top-0 left-0 right-0 h-[3px]" style={{ background: 'linear-gradient(to right, transparent, #d97757, transparent)' }} />
+
+      {/* Headline */}
+      <div
+        className="text-center transition-all duration-700"
+        style={{ opacity: visible ? 1 : 0, transform: visible ? 'translateY(0)' : 'translateY(24px)', transitionDelay: '0.1s' }}
+      >
+        <p className="text-[10px] uppercase tracking-[0.35em] font-bold text-[#d97757] mb-4" style={{ fontFamily: 'var(--font-mono, monospace)' }}>
+          Let&apos;s Connect
+        </p>
+        <h2
+          className="font-bold text-white"
+          style={{ fontFamily: 'var(--font-mono, monospace)', fontSize: 'clamp(32px, 8vw, 56px)', lineHeight: 1.05, letterSpacing: '-0.02em' }}
+        >
+          Let&apos;s build something.
+        </h2>
+        <p className="mt-4 text-sm text-white/50 font-mono">Open to full-time roles, internships, and freelance projects.</p>
+      </div>
+
+      {/* Social links */}
+      <div
+        className="flex flex-col sm:flex-row items-center gap-8 sm:gap-14 transition-all duration-700"
+        style={{ opacity: visible ? 1 : 0, transform: visible ? 'translateY(0)' : 'translateY(24px)', transitionDelay: '0.3s' }}
+      >
+        <a href={SOCIAL_LINKS.github} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 text-white/50 hover:text-[#d97757] transition-colors">
+          <GitHubIcon size={22} />
+          <span className="text-[11px] uppercase tracking-[0.25em] font-bold font-mono">GitHub</span>
+        </a>
+        <a href={SOCIAL_LINKS.whatsapp} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 text-white/50 hover:text-[#d97757] transition-colors">
+          <WhatsAppIcon size={22} />
+          <span className="text-[11px] uppercase tracking-[0.25em] font-bold font-mono">WhatsApp</span>
+        </a>
+        <a href={SOCIAL_LINKS.linkedin} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 text-white/50 hover:text-[#d97757] transition-colors">
+          <LinkedInIcon size={22} />
+          <span className="text-[11px] uppercase tracking-[0.25em] font-bold font-mono">LinkedIn</span>
+        </a>
+      </div>
+
+      {/* Footer */}
+      <p
+        className="text-[10px] uppercase tracking-[0.25em] text-white/20 transition-all duration-700"
+        style={{ fontFamily: 'var(--font-mono, monospace)', opacity: visible ? 1 : 0, transitionDelay: '0.5s' }}
+      >
+        © {new Date().getFullYear()} Binore Mohapatra &nbsp;·&nbsp; Designed &amp; Built by hand
+      </p>
+    </div>
+  );
+}
+
 // ─── Main Component ───────────────────────────────────────────────────────────
 export default function ConnectSection() {
   const [scrollPercentage, setScrollPercentage] = useState(0);
   const sectionRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const { tier } = useDeviceTier();
 
   // Phase keys — same pattern as Hero (re-triggers animation on entering window)
   const [animKeys, setAnimKeys] = useState({
@@ -198,6 +272,9 @@ export default function ConnectSection() {
   const footerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    // LOW tier: no scroll dependency — will use IntersectionObserver instead
+    if (tier === 'LOW') return;
+
     // 1. Setup video scrubbing and general scroll tracking
     const section = sectionRef.current;
     
@@ -212,14 +289,16 @@ export default function ConnectSection() {
           // Provide the scroll percentage to the rest of the component
           setScrollPercentage(self.progress);
           
-          // Scrub the video directly safely to prevent main-thread lockups
-          const video = videoRef.current;
-          if (video && video.duration && video.readyState >= 2) {
-            // Only seek if the video is not currently busy seeking, otherwise decoder hangs
-            if (!video.seeking) {
-              requestAnimationFrame(() => {
-                video.currentTime = self.progress * video.duration;
-              });
+          if (tier === 'HIGH') {
+            // Scrub the video directly safely to prevent main-thread lockups
+            const video = videoRef.current;
+            if (video && video.duration && video.readyState >= 2) {
+              // Only seek if the video is not currently busy seeking, otherwise decoder hangs
+              if (!video.seeking) {
+                requestAnimationFrame(() => {
+                  video.currentTime = self.progress * video.duration;
+                });
+              }
             }
           }
         }
@@ -230,7 +309,7 @@ export default function ConnectSection() {
         st.kill();
       };
     }
-  }, []);
+  }, [tier]);
 
   useEffect(() => {
     // 2. Handle text/opacity animations based on scrollPercentage
@@ -283,6 +362,17 @@ export default function ConnectSection() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [scrollPercentage]);
+
+  // ── LOW tier: simple static section with IntersectionObserver-based reveal ──
+  if (tier === 'LOW') {
+    return (
+      <LowTierConnectSection
+        animKeys={animKeys}
+        setAnimKeys={setAnimKeys}
+        SOCIAL_LINKS={SOCIAL_LINKS}
+      />
+    );
+  }
 
   return (
     <div
@@ -362,17 +452,36 @@ export default function ConnectSection() {
         </div>
       </div>
 
-      {/* ── Video background — hidden on mobile ── */}
+      {/* ── Background Video Container ── */}
       <div className="absolute inset-0 z-0 pointer-events-none hidden sm:block">
-        <div className="sticky top-0 w-full h-screen">
-          <video
-            ref={videoRef}
-            src="/videos/hands-connect-final2.mp4"
-            className="w-full h-full object-cover"
-            muted
-            playsInline
-            preload="auto"
-          />
+        <div className="sticky top-0 w-full h-screen overflow-hidden">
+          {tier === 'HIGH' ? (
+            <video
+              ref={videoRef}
+              src="/videos/hands-connect-final2.mp4"
+              className="w-full h-full object-cover"
+              muted
+              playsInline
+              preload="auto"
+            />
+          ) : tier === 'MEDIUM' ? (
+            <video
+              src="/videos/hands-connect-final2.mp4"
+              className="w-full h-full object-cover"
+              autoPlay
+              loop
+              muted
+              playsInline
+            />
+          ) : (
+            <video
+              src="/videos/hands-connect-final2.mp4#t=5"
+              className="w-full h-full object-cover"
+              muted
+              playsInline
+              preload="metadata"
+            />
+          )}
         </div>
       </div>
 

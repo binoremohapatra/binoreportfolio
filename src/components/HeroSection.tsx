@@ -9,6 +9,10 @@ import TextType from '@/components/ui/reactbits/TextType';
 import ScrollyVideo from 'scrolly-video/dist/ScrollyVideo.esm.jsx';
 import { useDeviceTier } from '@/hooks/useDeviceTier';
 
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+gsap.registerPlugin(ScrollTrigger);
+
 const windowOpacity = (p: number, enterStart: number, enterEnd: number, exitStart: number | null, exitEnd: number | null) => {
   if (p < enterStart) return 0;
   if (p < enterEnd) return (p - enterStart) / (enterEnd - enterStart); // fading in
@@ -62,8 +66,34 @@ function FadeUp({ children, delay = 0, playKey = 0 }: { children: React.ReactNod
 
 export default function HeroSection() {
   const [scrollPercentage, setScrollPercentage] = useState(0);
+  const sectionRef = useRef<HTMLDivElement>(null);
 
   const { tier } = useDeviceTier();
+
+  useEffect(() => {
+    // LOW tier: section is 100vh with no scroll — immediately show everything at p=1
+    if (tier === 'LOW') {
+      setScrollPercentage(0.5); // mid-point so phase0 content is fully visible
+      return;
+    }
+
+    // HIGH tier: ScrollyVideo handles scroll tracking natively via onChange.
+    if (tier === 'HIGH') return;
+
+    // MEDIUM tier: manual ScrollTrigger since looping <video> has no onChange.
+    if (sectionRef.current) {
+      const st = ScrollTrigger.create({
+        trigger: sectionRef.current,
+        start: 'top top',
+        end: 'bottom bottom',
+        scrub: true,
+        onUpdate: (self) => {
+          setScrollPercentage(self.progress);
+        }
+      });
+      return () => st.kill();
+    }
+  }, [tier]);
 
   // Track replays based on entering the scroll window
   const [animKeys, setAnimKeys] = useState({
@@ -159,21 +189,65 @@ export default function HeroSection() {
 
   }, [scrollPercentage, animKeys]);
 
-  return (
-    <div className="relative w-full" style={{ height: '830vh', background: '#0d0f12' }}>
+  // LOW tier: simple static 100vh section — no scroll dependency
+  if (tier === 'LOW') {
+    return (
+      <div className="relative w-full h-screen flex items-center" style={{ background: '#0d0f12' }}>
+        {/* Static paused video background */}
+        <video
+          src="/videos/full_site_intro_sequence.mp4#t=3"
+          className="absolute inset-0 w-full h-full object-cover object-[75%_center]"
+          muted playsInline preload="metadata"
+        />
+        {/* Gradient overlay */}
+        <div className="absolute inset-0" style={{ background: 'linear-gradient(to right, rgba(13,15,18,0.85) 0%, rgba(13,15,18,0.5) 55%, rgba(13,15,18,0) 80%)' }} />
+        {/* Static text — no scrollPercentage needed */}
+        <div className="relative z-10 px-8 sm:px-12 max-w-xl">
+          <h1 className="flex flex-wrap items-center gap-4 text-5xl sm:text-7xl font-bold tracking-tighter mb-4" style={{ fontFamily: 'var(--font-mono, monospace)', textShadow: '0 4px 24px rgba(0,0,0,0.6)' }}>
+            <span className="text-white">BINORE</span>
+            <span className="text-[#d97757]">MOHAPATRA</span>
+          </h1>
+          <p className="text-xl sm:text-2xl text-white font-sans font-medium mb-3 drop-shadow-md">Full-Stack Developer Intern</p>
+          <p className="text-sm font-mono uppercase tracking-wider text-white/70 mb-8">React · Node.js · Spring Boot · Cloud</p>
+          <div className="flex flex-wrap gap-4">
+            <a href="#projects" className="inline-flex items-center px-6 py-3 text-sm font-bold text-white bg-[#d97757] rounded-md" style={{ fontFamily: 'var(--font-mono, monospace)' }}>View My Work</a>
+            <a href="#connect" className="inline-flex items-center px-6 py-3 text-sm font-bold text-white/70 border border-white/20 rounded-md" style={{ fontFamily: 'var(--font-mono, monospace)' }}>Get in Touch</a>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
+  return (
+    <div ref={sectionRef} className="relative w-full" style={{ height: tier === 'MEDIUM' ? '830vh' : '830vh', background: '#0d0f12' }}>
+      
+      {/* ── Background Video Container ── */}
       {/* Target canvas/video to be right-weighted to fix framing issues where subject overlaps text */}
       <div className="absolute inset-0 [&_canvas]:!object-cover [&_canvas]:!object-[75%_center] sm:[&_canvas]:!object-[right_center] [&_video]:!object-cover [&_video]:!object-[75%_center] sm:[&_video]:!object-[right_center]">
-        <ScrollyVideo
-          src="/videos/full_site_intro_sequence.mp4"
-          useWebCodecs={tier === 'HIGH' && process.env.NODE_ENV === 'production'}
-          cover={true}
-          sticky={true}
-          full={true}
-          trackScroll={true}
-          transitionSpeed={tier === 'LOW' ? 4 : tier === 'MEDIUM' ? 8 : 12}
-          onChange={(percentage: number) => setScrollPercentage(percentage)}
-        />
+        {tier === 'HIGH' ? (
+          <ScrollyVideo
+            src="/videos/full_site_intro_sequence.mp4"
+            useWebCodecs={process.env.NODE_ENV === 'production'}
+            cover={true}
+            sticky={true}
+            full={true}
+            trackScroll={true}
+            transitionSpeed={12}
+            onChange={(percentage: number) => setScrollPercentage(percentage)}
+          />
+        ) : (
+          /* MEDIUM: looping video — text phases driven by scroll via ScrollTrigger */
+          <div className="sticky top-0 w-full h-screen overflow-hidden">
+            <video
+              src="/videos/full_site_intro_sequence.mp4"
+              className="w-full h-full object-cover object-[75%_center] sm:object-[right_center]"
+              autoPlay
+              loop
+              muted
+              playsInline
+            />
+          </div>
+        )}
       </div>
 
       {/* Overlay Container */}
