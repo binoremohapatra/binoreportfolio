@@ -137,7 +137,9 @@ export default function ExperienceConnector() {
   const pathRef = useRef<SVGPathElement>(null);
   const nodeOrbRefs = useRef<(HTMLDivElement | null)[]>([]);
   const textBlockRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const glowRefs = useRef<(HTMLDivElement | null)[]>([]);
   const idleAnimRef = useRef<gsap.core.Tween | null>(null);
+  const nodeActiveStateRef = useRef<boolean[]>([]);
 
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
   const { isReducedMotionActive } = useReducedMotion();
@@ -148,6 +150,10 @@ export default function ExperienceConnector() {
   const setTextBlockRef = useCallback((el: HTMLDivElement | null, i: number) => {
     textBlockRefs.current[i] = el;
   }, []);
+  const setGlowRef = useCallback((el: HTMLDivElement | null, i: number) => {
+    glowRefs.current[i] = el;
+  }, []);
+
 
   const SECTION_HEIGHT_VH = 250;
 
@@ -301,11 +307,33 @@ export default function ExperienceConnector() {
               (orb as HTMLElement).style.setProperty('--glow-opacity', '0.2');
             }
 
-            // Text envelope — flat/2D, no 3D applied
+            // Text envelope — flat/2D, no 3D applied, entrance/exit triggered via GSAP timelines
             if (textBlock) {
-              const op = windowOpacity(progress, range.enterStart, range.enterEnd, range.exitStart, range.exitEnd);
-              const ty = op < 1 && progress < range.enterEnd ? 24 * (1 - op) : 0;
-              gsap.set(textBlock, { opacity: op, y: ty });
+              const isActive = progress >= range.enterStart && (range.exitStart === null || progress < range.exitStart);
+              
+              if (isActive !== nodeActiveStateRef.current[i]) {
+                nodeActiveStateRef.current[i] = isActive;
+                const glowEl = glowRefs.current[i];
+                
+                if (isActive) {
+                  // Entrance animation
+                  gsap.fromTo(textBlock, 
+                    { opacity: 0, scale: 0.96, y: 12 },
+                    { opacity: 1, scale: 1, y: 0, duration: 0.6, ease: 'power3.out', overwrite: 'auto' }
+                  );
+                  // Glow delay - 'charges up' after panel appears
+                  if (glowEl) {
+                    gsap.to(glowEl, { opacity: 1, duration: 0.6, delay: 0.1, ease: 'power2.out', overwrite: 'auto' });
+                  }
+                } else {
+                  // Exit animation
+                  if (glowEl) {
+                    // Glow shuts off slightly before panel disappears
+                    gsap.to(glowEl, { opacity: 0, duration: 0.2, overwrite: 'auto' });
+                  }
+                  gsap.to(textBlock, { opacity: 0, scale: 0.97, y: 12, duration: 0.4, ease: 'power3.out', overwrite: 'auto' });
+                }
+              }
             }
           });
         },
@@ -338,9 +366,24 @@ export default function ExperienceConnector() {
     <section
       ref={sectionRef}
       className="relative w-full overflow-hidden bg-[#a8adac]"
-      style={{ height: `${SECTION_HEIGHT_VH}vh` }}
       aria-label="Experience timeline"
     >
+      <style>{`
+        @keyframes panelBreathe {
+          0%, 100% { box-shadow: 0 0 15px rgba(217, 119, 87, 0.15); }
+          50% { box-shadow: 0 0 25px rgba(217, 119, 87, 0.3); }
+        }
+        .panel-breathe {
+          animation: panelBreathe 4s ease-in-out infinite;
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .panel-breathe {
+            animation: none;
+            box-shadow: 0 0 15px rgba(217, 119, 87, 0.2);
+          }
+        }
+      `}</style>
+
 
       {/* ── Section label — flat, above 3D layer ── */}
       <div className="relative z-20 pt-24 pb-8 text-center pointer-events-none">
@@ -511,34 +554,40 @@ export default function ExperienceConnector() {
               ...(isLeft
                 ? { right: '54%', paddingRight: 48, textAlign: 'right' as const }
                 : { left: '54%', paddingLeft: 48, textAlign: 'left' as const }),
-              maxWidth: '36%',
+              maxWidth: '40%', // slightly wider for glassmorphic padding
             };
 
         return (
           <div
             key={node.id}
             ref={(el) => setTextBlockRef(el, i)}
-            className="z-30 pointer-events-auto"
+            className="z-30 pointer-events-auto group"
             style={{ ...textStyle, opacity: 0 }}
           >
-            {/* Card Container */}
+            {/* Connector dot - synchronizes with panel entrance */}
             <div 
-              className="bg-[#181a1b] p-6 sm:p-8 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.3)] border border-white/5 backdrop-blur-md text-left"
+              className={`absolute top-[50%] w-2 h-2 rounded-full bg-[#d97757] shadow-[0_0_10px_rgba(217,119,87,0.8)] ${
+                isMobile ? 'hidden' : isLeft ? '-right-2' : '-left-2'
+              } transform -translate-y-1/2`}
+            />
+
+            {/* Glowing Box-Shadow Element - isolates breathing shadow from backdrop blur */}
+            <div 
+               ref={(el) => setGlowRef(el, i)}
+               className="absolute inset-0 rounded-md panel-breathe pointer-events-none transition-shadow duration-300 group-hover:!shadow-[0_0_30px_rgba(217,119,87,0.5)]"
+               style={{ opacity: 0 }}
+            />
+
+            {/* Card Container - Frosted Glass */}
+            <div 
+              className="relative p-6 sm:p-8 rounded-md bg-black/25 backdrop-blur-md border border-[#d97757]/30 transition-colors duration-250 hover:bg-black/20 hover:border-[#d97757]/60 text-left"
               style={{
-                transition: 'transform 0.3s ease, box-shadow 0.3s ease',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateY(-4px)';
-                e.currentTarget.style.boxShadow = '0 25px 60px rgba(0,0,0,0.4)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = '0 20px 50px rgba(0,0,0,0.3)';
+                textShadow: '0 2px 4px rgba(0,0,0,0.8)', // legibility against glass
               }}
             >
               {/* Category pill */}
               <div
-                className="inline-block text-[10px] uppercase tracking-[0.28em] font-bold mb-3 px-3 py-1 bg-[#d97757]/10 rounded-full"
+                className="inline-block text-[10px] uppercase tracking-[0.28em] font-bold mb-3 px-3 py-1 bg-[#d97757]/15 rounded-full border border-[#d97757]/20"
                 style={{
                   fontFamily: 'var(--font-mono, monospace)',
                   color: '#d97757',
@@ -573,7 +622,7 @@ export default function ExperienceConnector() {
                 className="text-[14px] leading-relaxed mb-4"
                 style={{
                   fontFamily: 'var(--font-mono, monospace)',
-                  color: '#a8adac',
+                  color: '#d0d5d4', // slightly brighter text for frosted background
                 }}
               >
                 {node.description}
@@ -582,13 +631,19 @@ export default function ExperienceConnector() {
               {/* Tech tags */}
               {node.tech && (
                 <div
-                  className="text-[12px] uppercase tracking-wider font-semibold"
+                  className="text-[12px] uppercase tracking-wider font-semibold flex flex-wrap gap-2"
                   style={{
                     fontFamily: 'var(--font-mono, monospace)',
-                    color: '#2dd4bf',
                   }}
                 >
-                  {node.tech}
+                  {node.tech.split(',').map((tag) => (
+                    <span 
+                      key={tag} 
+                      className="text-[#2dd4bf] hover:text-[#4fe8d5] hover:scale-105 transition-all duration-200 cursor-default"
+                    >
+                      {tag.trim()}
+                    </span>
+                  ))}
                 </div>
               )}
             </div>
