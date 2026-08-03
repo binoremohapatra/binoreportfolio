@@ -137,7 +137,6 @@ export default function ExperienceConnector() {
   const pathRef = useRef<SVGPathElement>(null);
   const nodeOrbRefs = useRef<(HTMLDivElement | null)[]>([]);
   const textBlockRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const glowRefs = useRef<(HTMLDivElement | null)[]>([]);
   const idleAnimRef = useRef<gsap.core.Tween | null>(null);
   const nodeActiveStateRef = useRef<boolean[]>([]);
 
@@ -150,10 +149,6 @@ export default function ExperienceConnector() {
   const setTextBlockRef = useCallback((el: HTMLDivElement | null, i: number) => {
     textBlockRefs.current[i] = el;
   }, []);
-  const setGlowRef = useCallback((el: HTMLDivElement | null, i: number) => {
-    glowRefs.current[i] = el;
-  }, []);
-
 
   const SECTION_HEIGHT_VH = 250;
 
@@ -313,7 +308,6 @@ export default function ExperienceConnector() {
               
               if (isActive !== nodeActiveStateRef.current[i]) {
                 nodeActiveStateRef.current[i] = isActive;
-                const glowEl = glowRefs.current[i];
                 
                 if (isActive) {
                   // Entrance animation - now swings in with rotateY for depth
@@ -321,16 +315,8 @@ export default function ExperienceConnector() {
                     { opacity: 0, scale: 0.96, y: 12, rotateY: -8 },
                     { opacity: 1, scale: 1, y: 0, rotateY: 0, duration: 0.6, ease: 'power3.out', overwrite: 'auto' }
                   );
-                  // Glow delay - 'charges up' after panel appears
-                  if (glowEl) {
-                    gsap.to(glowEl, { opacity: 1, duration: 0.6, delay: 0.1, ease: 'power2.out', overwrite: 'auto' });
-                  }
                 } else {
                   // Exit animation
-                  if (glowEl) {
-                    // Glow shuts off slightly before panel disappears
-                    gsap.to(glowEl, { opacity: 0, duration: 0.2, overwrite: 'auto' });
-                  }
                   gsap.to(textBlock, { opacity: 0, scale: 0.97, y: 12, rotateY: 4, duration: 0.4, ease: 'power3.out', overwrite: 'auto' });
                 }
               }
@@ -545,7 +531,6 @@ export default function ExperienceConnector() {
           index={i}
           isMobile={isMobile}
           setTextBlockRef={setTextBlockRef}
-          setGlowRef={setGlowRef}
         />
       ))}
 
@@ -554,7 +539,7 @@ export default function ExperienceConnector() {
 }
 
 // ─── Subcomponent: Experience Card (Handles Tilt & Parallax) ───────────────
-function ExperienceCard({ node, pos, index, isMobile, setTextBlockRef, setGlowRef }: any) {
+function ExperienceCard({ node, pos, index, isMobile, setTextBlockRef }: any) {
   const isLeft = node.side === 'left';
   const cardRef = useRef<HTMLDivElement>(null);
   const [tilt, setTilt] = useState({ x: 0, y: 0 });
@@ -583,11 +568,9 @@ function ExperienceCard({ node, pos, index, isMobile, setTextBlockRef, setGlowRe
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
     
-    // Normalize to -1 to 1
     const xNorm = (x / rect.width) * 2 - 1;
     const yNorm = (y / rect.height) * 2 - 1;
     
-    // Max tilt ~8 degrees
     setTilt({ x: xNorm * 8, y: yNorm * 8 });
   };
 
@@ -602,45 +585,52 @@ function ExperienceCard({ node, pos, index, isMobile, setTextBlockRef, setGlowRe
       className="z-30 pointer-events-auto group"
       style={{ ...textStyle, opacity: 0 }}
     >
-      {/* Inner wrapper strictly bound to card size — fixes the glow padding bleed */}
+      {/* Inner wrapper bound to card size */}
       <div 
         ref={cardRef}
-        className="relative w-full h-full rounded-md"
+        className="relative w-full h-full"
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
         style={{
           transformStyle: 'preserve-3d',
           transform: `rotateX(${-tilt.y}deg) rotateY(${tilt.x}deg)`,
-          transition: 'transform 0.1s ease-out', // snappy but smooth tilt
+          transition: 'transform 0.1s ease-out',
         }}
       >
-        {/* Connector dot - strictly positioned against the card edge */}
+        {/* 1. SOLID BACKING LAYER (The literal thickness) */}
         <div 
-          className={`absolute top-[50%] w-2 h-2 rounded-full bg-[#d97757] shadow-[0_0_10px_rgba(217,119,87,0.8)] ${
+          className="absolute inset-0 rounded-md bg-[#0d0f12] pointer-events-none shadow-2xl"
+          style={{
+            transform: `translate(${8 - tilt.x * 2}px, ${8 - tilt.y * 2}px)`,
+            transition: 'transform 0.1s ease-out',
+          }}
+        />
+
+        {/* 2. VISIBLE SIDE-EDGE STRIPS (Forms the 3D sides) */}
+        {/* Right Edge Strip */}
+        <div 
+          className="absolute top-[4px] -right-[8px] bottom-[-4px] w-[8px] bg-[#090a0c] pointer-events-none"
+          style={{ transform: 'skewY(45deg)', transformOrigin: 'top left', opacity: isMobile ? 0 : 1 }}
+        />
+        {/* Bottom Edge Strip */}
+        <div 
+          className="absolute -bottom-[8px] left-[4px] right-[-4px] h-[8px] bg-[#050607] pointer-events-none"
+          style={{ transform: 'skewX(45deg)', transformOrigin: 'top left', opacity: isMobile ? 0 : 1 }}
+        />
+
+        {/* Connector dot - embedded in the top-left/right gap */}
+        <div 
+          className={`absolute -top-1 w-2 h-2 rounded-full bg-[#d97757] shadow-[0_0_10px_rgba(217,119,87,0.8)] ${
             isMobile ? 'hidden' : isLeft ? '-right-1 translate-x-1/2' : '-left-1 -translate-x-1/2'
-          } transform -translate-y-1/2 z-10 transition-opacity duration-300`}
+          } z-20 transition-opacity duration-300`}
         />
 
-        {/* Ambient Breathing Glow Element */}
+        {/* 3. FRONT GLASS PANEL */}
         <div 
-           ref={(el) => setGlowRef(el, index)}
-           className="absolute inset-0 rounded-md panel-breathe pointer-events-none transition-shadow duration-300"
-           style={{ opacity: 0 }}
-        />
-
-        {/* Thick Glass Slab Card */}
-        <div 
-          className="relative p-8 sm:p-10 rounded-md bg-black/30 backdrop-blur-lg border-2 border-[#d97757]/30 text-left overflow-hidden"
+          className="relative w-full h-full p-8 sm:p-10 rounded-md bg-black/30 backdrop-blur-lg border-2 border-[#d97757]/30 text-left overflow-hidden z-10"
           style={{
             textShadow: '0 2px 4px rgba(0,0,0,0.8)',
-            // The layered shadow stack creates physical thickness
-            boxShadow: `
-              inset 0 1px 0 rgba(255, 255, 255, 0.05),
-              0 0 0 1px rgba(217, 119, 87, 0.15),
-              ${-tilt.x * 2}px ${8 + tilt.y * 2}px 24px rgba(0, 0, 0, 0.5),
-              ${-tilt.x * 4}px ${20 + tilt.y * 4}px 40px rgba(0, 0, 0, 0.4)
-            `,
-            transition: 'box-shadow 0.1s ease-out', // match tilt speed
+            boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.08)',
           }}
         >
           {/* Inner glass refraction border */}
@@ -658,7 +648,7 @@ function ExperienceCard({ node, pos, index, isMobile, setTextBlockRef, setGlowRe
           )}
 
           {/* Content */}
-          <div className="relative z-10">
+          <div className="relative z-20">
             {/* Category pill */}
             <div
               className="inline-block text-[10px] uppercase tracking-[0.28em] font-bold mb-3 px-3 py-1 bg-[#d97757]/15 rounded-full border border-[#d97757]/20"
@@ -693,7 +683,7 @@ function ExperienceCard({ node, pos, index, isMobile, setTextBlockRef, setGlowRe
             {node.tech && (
               <div className="text-[12px] uppercase tracking-wider font-semibold flex flex-wrap gap-2" style={{ fontFamily: 'var(--font-mono, monospace)' }}>
                 {node.tech.split('·').map((tag: string) => (
-                  <span key={tag} className="text-[#2dd4bf] hover:text-[#4fe8d5] hover:scale-105 transition-all duration-200 cursor-default inline-block">
+                  <span key={tag} className="text-[#d97757]/80 hover:text-[#d97757] hover:scale-105 transition-all duration-200 cursor-default inline-block">
                     {tag.trim()}
                   </span>
                 ))}
