@@ -452,6 +452,13 @@ export default function ProjectsOrbit() {
     };
   }, [tier, isTouchDevice, prefersReducedMotion]);
 
+  const [debugInfo, setDebugInfo] = useState('');
+  useEffect(() => {
+    const cores = typeof navigator !== 'undefined' ? navigator.hardwareConcurrency : 'N/A';
+    const mem = typeof navigator !== 'undefined' ? (navigator as any).deviceMemory : 'N/A';
+    setDebugInfo(`Cores: ${cores} | Mem: ${mem} | VW: ${window.innerWidth}`);
+  }, []);
+
   return (
     <section
       id="projects"
@@ -459,6 +466,11 @@ export default function ProjectsOrbit() {
       className="relative h-screen w-full overflow-hidden bg-[#a8adac] text-gray-900 flex items-center justify-center scroll-touch-fix"
       style={{ perspective: tier === 'LOW' ? '2000px' : '4000px' }}
     >
+      {/* DEBUG INDICATOR - TEMPORARY */}
+      <div className="absolute top-24 left-4 z-[9999] bg-red-600 text-white text-xs p-2 font-mono rounded font-bold">
+        TIER: {tier} | {debugInfo}
+      </div>
+
       {/* Grain overlay */}
       <div className="absolute inset-0 z-0 pointer-events-none mix-blend-overlay opacity-10">
         <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
