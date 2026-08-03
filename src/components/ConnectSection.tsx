@@ -442,45 +442,17 @@ export default function ConnectSection() {
         </div>
       </div>
 
-      {/* ── Background Video Container ── */}
-      <div className="absolute inset-0 z-0 pointer-events-none hidden sm:block">
+      {/* ── Background Video Container (Scrubbed on all tiers) ── */}
+      <div className="absolute inset-0 z-0 pointer-events-none">
         <div className="sticky top-0 w-full h-screen overflow-hidden">
-          {tier === 'high' ? (
-            <video
-              ref={videoRef}
-              src="/videos/hands-connect-final2.mp4"
-              className="w-full h-full object-cover"
-              muted
-              playsInline
-              preload="auto"
-            />
-          ) : tier === 'medium' ? (
-            <video
-              src="/videos/hands-connect-final2.mp4"
-              className="w-full h-full object-cover"
-              autoPlay
-              loop
-              muted
-              playsInline
-            />
-          ) : (
-            <video
-              src="/videos/hands-connect-final2.mp4#t=5"
-              className="w-full h-full object-cover"
-              muted
-              playsInline
-              preload="metadata"
-            />
-          )}
-        </div>
-      </div>
-
-      {/* ── Mobile Fallback: CSS Glowing Connection Point ── */}
-      <div className="absolute inset-0 z-0 pointer-events-none sm:hidden flex items-center justify-center">
-        <div className="sticky top-0 w-full h-screen flex items-center justify-center">
-          <div className="relative w-4 h-4 rounded-full bg-[#d97757] animate-pulse shadow-[0_0_40px_10px_rgba(217,119,87,0.6)]">
-            <div className="absolute inset-0 rounded-full border border-[#d97757] animate-ping opacity-50" />
-          </div>
+          <video
+            ref={videoRef}
+            src="/videos/hands-connect-final2.mp4"
+            className="w-full h-full object-cover"
+            muted
+            playsInline
+            preload="auto"
+          />
         </div>
       </div>
 
