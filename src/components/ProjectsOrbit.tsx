@@ -341,21 +341,45 @@ export default function ProjectsOrbit() {
                   href={project.link || project.github || '#'}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group relative flex flex-col gap-3 rounded-xl p-5 border border-white/10 hover:border-white/20 transition-all duration-300 overflow-hidden"
-                  style={{ background: '#0d0f12' }}
+                  className="group relative flex flex-col gap-3 rounded-2xl p-6 border transition-all duration-500 overflow-hidden backdrop-blur-xl shadow-2xl hover:shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:-translate-y-1"
+                  style={{ 
+                    background: 'linear-gradient(135deg, rgba(20, 22, 26, 0.7) 0%, rgba(13, 15, 18, 0.4) 100%)',
+                    borderColor: 'rgba(255, 255, 255, 0.08)'
+                  }}
                 >
-                  <div className="absolute top-0 left-0 right-0 h-[2px]" style={{ background: `linear-gradient(to right, ${config.color}80, transparent)` }} />
-                  <div className="flex items-start justify-between gap-2">
+                  {/* Subtle pattern background for texture */}
+                  <div 
+                    className="absolute inset-0 z-0 mix-blend-screen opacity-[0.08] transition-opacity duration-500 group-hover:opacity-[0.15] pointer-events-none" 
+                    style={{ backgroundImage: config.pattern, backgroundSize: config.patternSize || 'auto' }} 
+                  />
+                  
+                  {/* Colored glow effect on hover */}
+                  <div className="absolute -top-20 -right-20 w-40 h-40 rounded-full blur-[50px] opacity-0 group-hover:opacity-20 transition-opacity duration-700 pointer-events-none" style={{ background: config.color }} />
+
+                  {/* Content (z-10 to stay above patterns) */}
+                  <div className="relative z-10 flex items-start justify-between gap-3">
                     <div>
-                      <p className="text-[9px] uppercase tracking-[0.2em] font-mono mb-1" style={{ color: config.color, opacity: 0.8 }}>{config.label}</p>
-                      <h3 className="text-sm font-bold text-white group-hover:text-[#d97757] transition-colors duration-300 font-mono">{project.title}</h3>
+                      <p className="text-[9px] uppercase tracking-[0.25em] font-mono mb-2 font-bold" style={{ color: config.color, opacity: 0.9 }}>{config.label}</p>
+                      <h3 className="text-base sm:text-lg font-bold text-white group-hover:text-white transition-colors duration-300 font-mono tracking-tight">{project.title}</h3>
                     </div>
-                    <Icon size={20} style={{ color: config.color, opacity: 0.7, flexShrink: 0 }} />
+                    <div className="p-2 rounded-lg bg-white/5 border border-white/5 backdrop-blur-md group-hover:bg-white/10 transition-colors duration-300">
+                      <Icon size={20} style={{ color: config.color, opacity: 0.9, filter: `drop-shadow(0 0 10px ${config.color}80)` }} />
+                    </div>
                   </div>
-                  <p className="text-[11px] text-white/40 font-mono uppercase tracking-wide">{project.category}</p>
-                  <div className="flex gap-3 mt-auto">
-                    {project.link && <span className="text-[10px] text-[#2dd4bf]/70 font-mono uppercase tracking-wide">↗ Live</span>}
-                    {project.github && <span className="text-[10px] text-white/40 font-mono uppercase tracking-wide">GitHub</span>}
+                  
+                  <p className="relative z-10 text-[11px] text-white/50 font-mono uppercase tracking-wide mt-1">{project.category}</p>
+                  
+                  <div className="relative z-10 flex gap-4 mt-auto pt-5 border-t border-white/5">
+                    {project.link && (
+                      <span className="flex items-center gap-2 text-[10px] font-bold text-[#2dd4bf] font-mono uppercase tracking-widest transition-colors hover:text-white">
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#2dd4bf] animate-pulse shadow-[0_0_8px_#2dd4bf]"/> LIVE
+                      </span>
+                    )}
+                    {project.github && (
+                      <span className="text-[10px] font-bold text-white/50 hover:text-white transition-colors font-mono uppercase tracking-widest flex items-center gap-1">
+                        GITHUB ↗
+                      </span>
+                    )}
                   </div>
                 </a>
               );
