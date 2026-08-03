@@ -23,6 +23,7 @@ import React, { useRef, useEffect, useState, useCallback, useMemo } from 'react'
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useReducedMotion } from '@/providers/ReducedMotionProvider';
+import { useAdaptiveQuality } from '@/hooks/useAdaptiveQuality';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -542,7 +543,9 @@ export default function ExperienceConnector() {
 function ExperienceCard({ node, pos, index, isMobile, setTextBlockRef }: any) {
   const isLeft = node.side === 'left';
   const cardRef = useRef<HTMLDivElement>(null);
-  const [tilt, setTilt] = useState({ x: 0, y: 0 });
+  const sheenRef = useRef<HTMLDivElement>(null);
+  const backingRef = useRef<HTMLDivElement>(null);
+  const { tier } = useAdaptiveQuality();
 
   const textStyle: React.CSSProperties = isMobile
     ? {
@@ -563,7 +566,7 @@ function ExperienceCard({ node, pos, index, isMobile, setTextBlockRef }: any) {
       };
 
   const handleMouseMove = (e: React.MouseEvent) => {
-    if (isMobile || !cardRef.current) return;
+    if (isMobile || tier === 'low' || !cardRef.current) return;
     const rect = cardRef.current.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
@@ -571,12 +574,30 @@ function ExperienceCard({ node, pos, index, isMobile, setTextBlockRef }: any) {
     const xNorm = (x / rect.width) * 2 - 1;
     const yNorm = (y / rect.height) * 2 - 1;
     
-    setTilt({ x: xNorm * 8, y: yNorm * 8 });
+    const tiltX = xNorm * 8;
+    const tiltY = yNorm * 8;
+    
+    // Direct DOM mutation avoids React setState jank (60fps)
+    cardRef.current.style.transform = `rotateX(${-tiltY}deg) rotateY(${tiltX}deg)`;
+    
+    if (backingRef.current) {
+      backingRef.current.style.transform = `translate(${8 - tiltX * 0.25}px, ${8 - tiltY * 0.25}px)`;
+    }
+    
+    if (sheenRef.current) {
+      sheenRef.current.style.background = `radial-gradient(circle at ${50 - tiltX * 3.75}% ${50 - tiltY * 3.75}%, rgba(255,255,255,0.5) 0%, transparent 60%)`;
+    }
   };
 
   const handleMouseLeave = () => {
-    if (isMobile) return;
-    setTilt({ x: 0, y: 0 });
+    if (isMobile || !cardRef.current) return;
+    cardRef.current.style.transform = `rotateX(0deg) rotateY(0deg)`;
+    if (backingRef.current) {
+      backingRef.current.style.transform = `translate(8px, 8px)`;
+    }
+    if (sheenRef.current) {
+      sheenRef.current.style.background = `radial-gradient(circle at 50% 50%, rgba(255,255,255,0.5) 0%, transparent 60%)`;
+    }
   };
 
   return (
@@ -593,15 +614,16 @@ function ExperienceCard({ node, pos, index, isMobile, setTextBlockRef }: any) {
         onMouseLeave={handleMouseLeave}
         style={{
           transformStyle: 'preserve-3d',
-          transform: `rotateX(${-tilt.y}deg) rotateY(${tilt.x}deg)`,
+          transform: `rotateX(0deg) rotateY(0deg)`,
           transition: 'transform 0.1s ease-out',
         }}
       >
         {/* 1. SOLID BACKING LAYER (The literal thickness) */}
         <div 
-          className="absolute inset-0 rounded-md bg-[#0d0f12] pointer-events-none shadow-2xl"
+          ref={backingRef}
+          className="absolute inset-0 rounded-md bg-[#0d0f12] pointer-events-none shadow-[-20px_20px_40px_rgba(0,0,0,0.4)]"
           style={{
-            transform: `translate(${8 - tilt.x * 2}px, ${8 - tilt.y * 2}px)`,
+            transform: `translate(8px, 8px)`,
             transition: 'transform 0.1s ease-out',
           }}
         />
@@ -618,7 +640,7 @@ function ExperienceCard({ node, pos, index, isMobile, setTextBlockRef }: any) {
           className="relative w-full h-full p-8 sm:p-10 rounded-md backdrop-blur-md border-2 border-[#d97757]/40 text-left overflow-hidden z-10"
           style={{
             backgroundColor: 'rgba(168, 173, 172, 0.15)', // Light grey base (#a8adac)
-            textShadow: '0 2px 12px rgba(0,0,0,0.85), 0 1px 3px rgba(0,0,0,0.9)',
+            // No text-shadow for dark text on light bg
             // Top-edge glass refraction highlight
             boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.15), inset 0 0 0 1px rgba(255,255,255,0.05)',
           }}
@@ -629,9 +651,10 @@ function ExperienceCard({ node, pos, index, isMobile, setTextBlockRef }: any) {
           {/* Dynamic glass sheen overlay — more visible now that bg is light */}
           {!isMobile && (
             <div 
+              ref={sheenRef}
               className="absolute inset-0 pointer-events-none opacity-30"
               style={{
-                background: `radial-gradient(circle at ${50 - tilt.x * 30}% ${50 - tilt.y * 30}%, rgba(255,255,255,0.5) 0%, transparent 60%)`,
+                background: `radial-gradient(circle at 50% 50%, rgba(255,255,255,0.5) 0%, transparent 60%)`,
                 transition: 'background 0.1s ease-out',
               }}
             />
@@ -650,7 +673,7 @@ function ExperienceCard({ node, pos, index, isMobile, setTextBlockRef }: any) {
             {/* Title */}
             <h3
               className="text-xl sm:text-2xl font-bold tracking-tight mb-3 leading-tight"
-              style={{ fontFamily: 'var(--font-mono, monospace)', color: '#ffffff' }}
+              style={{ fontFamily: 'var(--font-mono, monospace)', color: '#181a1b' }}
             >
               {node.title}
             </h3>
@@ -658,13 +681,13 @@ function ExperienceCard({ node, pos, index, isMobile, setTextBlockRef }: any) {
             {/* Divider line */}
             <div
               className="mb-4"
-              style={{ height: '1px', background: 'linear-gradient(to right, rgba(217,119,87,0.5), transparent)', width: '100%' }}
+              style={{ height: '1px', background: 'linear-gradient(to right, rgba(217,119,87,0.8), transparent)', width: '100%' }}
             />
 
             {/* Description */}
             <p
               className="text-[14px] leading-relaxed mb-6"
-              style={{ fontFamily: 'var(--font-mono, monospace)', color: 'rgba(255,255,255,0.85)' }}
+              style={{ fontFamily: 'var(--font-mono, monospace)', color: '#181a1b' }}
             >
               {node.description}
             </p>
