@@ -85,8 +85,6 @@ function computeTier(): DeviceTierInfo {
     tier = 'MEDIUM';
   }
 
-  const isTouchDevice = typeof window !== 'undefined' && ('ontouchstart' in window || (typeof navigator !== 'undefined' && navigator.maxTouchPoints > 0));
-
   return { tier, isTouchDevice, prefersReducedMotion: false };
 }
 
