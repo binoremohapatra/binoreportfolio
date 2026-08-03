@@ -366,6 +366,7 @@ export default function ExperienceConnector() {
     <section
       ref={sectionRef}
       className="relative w-full overflow-hidden bg-[#a8adac]"
+      style={{ height: `${SECTION_HEIGHT_VH}vh` }}
       aria-label="Experience timeline"
     >
       <style>{`
