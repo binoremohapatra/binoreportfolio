@@ -342,17 +342,17 @@ export default function ProjectsOrbit() {
                   target="_blank"
                   rel="noopener noreferrer"
                   className="group relative flex flex-col gap-3 rounded-2xl p-6 border transition-all duration-500 overflow-hidden backdrop-blur-xl shadow-2xl hover:shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:-translate-y-1"
-                  style={{ 
+                  style={{
                     background: 'linear-gradient(135deg, rgba(20, 22, 26, 0.7) 0%, rgba(13, 15, 18, 0.4) 100%)',
                     borderColor: 'rgba(255, 255, 255, 0.08)'
                   }}
                 >
                   {/* Subtle pattern background for texture */}
-                  <div 
-                    className="absolute inset-0 z-0 mix-blend-screen opacity-[0.08] transition-opacity duration-500 group-hover:opacity-[0.15] pointer-events-none" 
-                    style={{ backgroundImage: config.pattern, backgroundSize: config.patternSize || 'auto' }} 
+                  <div
+                    className="absolute inset-0 z-0 mix-blend-screen opacity-[0.08] transition-opacity duration-500 group-hover:opacity-[0.15] pointer-events-none"
+                    style={{ backgroundImage: config.pattern, backgroundSize: config.patternSize || 'auto' }}
                   />
-                  
+
                   {/* Colored glow effect on hover */}
                   <div className="absolute -top-20 -right-20 w-40 h-40 rounded-full blur-[50px] opacity-0 group-hover:opacity-20 transition-opacity duration-700 pointer-events-none" style={{ background: config.color }} />
 
@@ -366,13 +366,13 @@ export default function ProjectsOrbit() {
                       <Icon size={20} style={{ color: config.color, opacity: 0.9, filter: `drop-shadow(0 0 10px ${config.color}80)` }} />
                     </div>
                   </div>
-                  
+
                   <p className="relative z-10 text-[11px] text-white/50 font-mono uppercase tracking-wide mt-1">{project.category}</p>
-                  
+
                   <div className="relative z-10 flex gap-4 mt-auto pt-5 border-t border-white/5">
                     {project.link && (
                       <span className="flex items-center gap-2 text-[10px] font-bold text-[#2dd4bf] font-mono uppercase tracking-widest transition-colors hover:text-white">
-                        <span className="w-1.5 h-1.5 rounded-full bg-[#2dd4bf] animate-pulse shadow-[0_0_8px_#2dd4bf]"/> LIVE
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#2dd4bf] animate-pulse shadow-[0_0_8px_#2dd4bf]" /> LIVE
                       </span>
                     )}
                     {project.github && (
@@ -624,8 +624,8 @@ function ProjectsOrbit3D() {
 
             {/* Hover/touch overlay with title/category/buttons */}
             <div className={`absolute inset-0 z-10 bg-gradient-to-t from-black/90 via-black/40 to-transparent flex flex-col justify-end p-3 sm:p-4 ${isTouchDevice
-                ? 'opacity-100' /* Always visible on touch — no hover on mobile */
-                : 'opacity-0 group-hover:opacity-100 transition-opacity duration-300'
+              ? 'opacity-100' /* Always visible on touch — no hover on mobile */
+              : 'opacity-0 group-hover:opacity-100 transition-opacity duration-300'
               }`}>
               <p className="font-mono text-[8px] uppercase tracking-widest text-[#d97757] mb-1">{project.category}</p>
               <h3 className="text-xs sm:text-sm md:text-lg font-bold text-white mb-2">{project.title}</h3>

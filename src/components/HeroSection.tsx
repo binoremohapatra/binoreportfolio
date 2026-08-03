@@ -2,9 +2,8 @@
 
 import React, { useRef, useState, useEffect } from 'react';
 import gsap from 'gsap';
-import SplitText from '@/components/ui/reactbits/SplitText';
 import BlurText from '@/components/ui/reactbits/BlurText';
-import TextType from '@/components/ui/reactbits/TextType';
+import ScrollReveal from '@/components/ui/reactbits/ScrollReveal';
 // @ts-ignore
 import ScrollyVideo from 'scrolly-video/dist/ScrollyVideo.esm.jsx';
 import { useAdaptiveQuality } from '@/hooks/useAdaptiveQuality';
@@ -169,31 +168,9 @@ export default function HeroSection() {
 
   }, [scrollPercentage, animKeys, isReady]);
 
-  // While quality context initializes (isReady=false), render a bare dark shell.
-  // ScrollyVideo will NOT mount until isReady — this prevents 46MB video loading before
-  // we know the device is capable. The shell shows name/CTA immediately.
-  if (!isReady) {
-    return (
-      <div className="relative w-full h-screen flex items-center" style={{ background: '#0d0f12' }}>
-        <div className="absolute inset-0" style={{ background: 'linear-gradient(to right, rgba(13,15,18,0.9) 0%, rgba(13,15,18,0.6) 55%, rgba(13,15,18,0.1) 80%)' }} />
-        <div className="relative z-10 px-8 sm:px-12 max-w-xl">
-          <h1
-            className="flex flex-wrap items-center gap-4 font-bold tracking-tighter mb-4"
-            style={{ fontFamily: 'var(--font-mono, monospace)', fontSize: 'clamp(40px, 10vw, 72px)' }}
-          >
-            <span className="text-white">BINORE</span>
-            <span className="text-[#d97757]">MOHAPATRA</span>
-          </h1>
-          <p className="text-xl text-white font-sans font-medium mb-3">Full-Stack Developer Intern</p>
-          <p className="text-sm font-mono uppercase tracking-wider text-white/70 mb-8">React · Node.js · Spring Boot · Cloud</p>
-          <div className="flex flex-wrap gap-4">
-            <a href="#projects" className="inline-flex items-center px-6 py-3 text-sm font-bold text-white bg-[#d97757] rounded-md">View My Work</a>
-            <a href="#connect" className="inline-flex items-center px-6 py-3 text-sm font-bold text-white/70 border border-white/20 rounded-md">Get in Touch</a>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  // We removed the `!isReady` early return shell that was rendering plain HTML tags.
+  // That fallback was causing the entire block to render completely statically on mount,
+  // bypassing the animation libraries. We now conditionally load the ScrollyVideo below.
 
   return (
     <div ref={sectionRef} className="relative w-full" style={{ height: '830vh', background: '#0d0f12' }}>
@@ -202,16 +179,18 @@ export default function HeroSection() {
       {/* LOW tier: useWebCodecs=false (seek-based scrubbing, no frame-cache extraction) */}
       {/* MED/HIGH tier: useWebCodecs=true (faster frame decode via WebCodecs API) */}
       <div className="absolute inset-0 [&_canvas]:!object-cover [&_canvas]:!object-[75%_center] sm:[&_canvas]:!object-[right_center] [&_video]:!object-cover [&_video]:!object-[75%_center] sm:[&_video]:!object-[right_center]">
-        <ScrollyVideo
-          src="/videos/full_site_intro_720p.mp4"
-          useWebCodecs={useWebCodecs && process.env.NODE_ENV === 'production'}
-          cover={true}
-          sticky={true}
-          full={true}
-          trackScroll={true}
-          transitionSpeed={tier === 'low' ? 4 : tier === 'medium' ? 8 : 12}
-          onChange={(percentage: number) => setScrollPercentage(percentage)}
-        />
+        {isReady && (
+          <ScrollyVideo
+            src="/videos/full_site_intro_720p.mp4"
+            useWebCodecs={useWebCodecs && process.env.NODE_ENV === 'production'}
+            cover={true}
+            sticky={true}
+            full={true}
+            trackScroll={true}
+            transitionSpeed={tier === 'low' ? 4 : tier === 'medium' ? 8 : 12}
+            onChange={(percentage: number) => setScrollPercentage(percentage)}
+          />
+        )}
       </div>
 
       {/* Overlay Container */}
@@ -234,47 +213,48 @@ export default function HeroSection() {
               {/* PHASE 0: Initial Resume Info */}
               <div ref={introRef} className="absolute inset-0 flex flex-col justify-center pointer-events-none">
                 <h1 className="flex flex-wrap items-center gap-4 text-5xl sm:text-7xl font-bold tracking-tighter mb-4" style={{ fontFamily: 'var(--font-mono, "JetBrains Mono", monospace)', textShadow: '0 4px 24px rgba(0,0,0,0.6)' }}>
-                  <SplitText
+                  <BlurText
                     key={`p0-1-${animKeys.phase0}`}
                     text="BINORE"
                     delay={40}
-                    duration={1.2}
-                    ease="power3.out"
-                    splitType="chars"
-                    from={{ opacity: 0, y: 40, scale: 0.9 }}
-                    to={{ opacity: 1, y: 0, scale: 1 }}
-                    tag="span"
+                    animateBy="letters"
+                    direction="top"
                     className="text-white"
                   />
-                  <SplitText
+                  <BlurText
                     key={`p0-2-${animKeys.phase0}`}
                     text="MOHAPATRA"
                     delay={40}
-                    duration={1.2}
-                    ease="power3.out"
-                    splitType="chars"
-                    from={{ opacity: 0, y: 40, scale: 0.9 }}
-                    to={{ opacity: 1, y: 0, scale: 1 }}
-                    tag="span"
+                    animateBy="letters"
+                    direction="top"
                     className="text-[#d97757]"
                   />
                 </h1>
                 {animKeys.phase0 > 0 && (
                   <>
-                    <BlurText
-                      text="Full-Stack Developer Intern"
-                      delay={100}
-                      animateBy="words"
-                      direction="top"
-                      className="text-xl sm:text-2xl text-white font-sans font-medium mb-6 drop-shadow-md"
-                    />
+                    <ScrollReveal
+                      customTriggerRef={sectionRef}
+                      customStart="top top"
+                      customEnd="top -5%"
+                      baseOpacity={0}
+                      baseRotation={0}
+                      blurStrength={10}
+                      textClassName="text-xl sm:text-2xl text-white font-sans font-medium mb-6 drop-shadow-md"
+                    >
+                      Full-Stack Developer Intern
+                    </ScrollReveal>
+                    
                     <div className="font-mono text-sm leading-relaxed max-w-lg uppercase tracking-wider text-white font-semibold drop-shadow-md min-h-[48px] sm:min-h-[40px]">
-                      <TextType
-                        text="API Development ✦ Cloud Deployment ✦ React ✦ Node.js ✦ Spring Boot"
-                        typingSpeed={40}
-                        cursorCharacter="|"
-                        cursorClassName="text-[#2dd4bf]"
-                      />
+                      <ScrollReveal
+                        customTriggerRef={sectionRef}
+                        customStart="top top"
+                        customEnd="top -10%"
+                        baseOpacity={0}
+                        baseRotation={0}
+                        blurStrength={8}
+                      >
+                        API Development ✦ Cloud Deployment ✦ React ✦ Node.js ✦ Spring Boot
+                      </ScrollReveal>
                     </div>
                   </>
                 )}

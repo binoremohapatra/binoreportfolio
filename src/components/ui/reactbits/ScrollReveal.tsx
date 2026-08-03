@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 // ScrollReveal – React Bits (GSAP + ScrollTrigger)
 import { useEffect, useRef, useMemo } from "react";
 import { gsap } from "gsap";
@@ -18,6 +18,9 @@ interface ScrollRevealProps {
   textClassName?: string;
   rotationEnd?: string;
   wordAnimationEnd?: string;
+  customTriggerRef?: React.RefObject<HTMLElement | null>;
+  customStart?: string;
+  customEnd?: string;
 }
 
 const ScrollReveal = ({
@@ -31,6 +34,9 @@ const ScrollReveal = ({
   textClassName = "",
   rotationEnd = "bottom bottom",
   wordAnimationEnd = "bottom bottom",
+  customTriggerRef,
+  customStart,
+  customEnd,
 }: ScrollRevealProps) => {
   const containerRef = useRef<HTMLHeadingElement>(null);
 
@@ -47,6 +53,10 @@ const ScrollReveal = ({
     if (!el) return;
     const scroller =
       scrollContainerRef && scrollContainerRef.current ? scrollContainerRef.current : window;
+    const triggerEl = customTriggerRef && customTriggerRef.current ? customTriggerRef.current : el;
+    const startPos = customStart || "top bottom";
+    const endRot = customEnd || rotationEnd;
+    const endWord = customEnd || wordAnimationEnd;
 
     gsap.fromTo(
       el,
@@ -54,7 +64,7 @@ const ScrollReveal = ({
       {
         ease: "none",
         rotate: 0,
-        scrollTrigger: { trigger: el, scroller, start: "top bottom", end: rotationEnd, scrub: true },
+        scrollTrigger: { trigger: triggerEl, scroller, start: startPos, end: endRot, scrub: true },
       }
     );
 
@@ -67,7 +77,7 @@ const ScrollReveal = ({
         ease: "none",
         opacity: 1,
         stagger: 0.05,
-        scrollTrigger: { trigger: el, scroller, start: "top bottom-=20%", end: wordAnimationEnd, scrub: true },
+        scrollTrigger: { trigger: triggerEl, scroller, start: customStart || "top bottom-=20%", end: endWord, scrub: true },
       }
     );
 
@@ -79,7 +89,7 @@ const ScrollReveal = ({
           ease: "none",
           filter: "blur(0px)",
           stagger: 0.05,
-          scrollTrigger: { trigger: el, scroller, start: "top bottom-=20%", end: wordAnimationEnd, scrub: true },
+          scrollTrigger: { trigger: triggerEl, scroller, start: customStart || "top bottom-=20%", end: endWord, scrub: true },
         }
       );
     }
