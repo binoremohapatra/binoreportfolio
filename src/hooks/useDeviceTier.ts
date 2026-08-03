@@ -29,13 +29,14 @@ function computeTier(): DeviceTierInfo {
     return { tier: 'HIGH', isTouchDevice: false, prefersReducedMotion: false };
   }
 
-  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const mql = typeof window !== 'undefined' && window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : null;
+  const prefersReducedMotion = mql ? mql.matches : false;
 
   // If the user explicitly wants reduced motion, always treat as LOW
   if (prefersReducedMotion) {
     return {
       tier: 'LOW',
-      isTouchDevice: 'ontouchstart' in window || navigator.maxTouchPoints > 0,
+      isTouchDevice: typeof window !== 'undefined' && ('ontouchstart' in window || (typeof navigator !== 'undefined' && navigator.maxTouchPoints > 0)),
       prefersReducedMotion: true,
     };
   }
@@ -47,13 +48,13 @@ function computeTier(): DeviceTierInfo {
   let highVotes = 0;
 
   // 1. CPU cores
-  const cores = navigator.hardwareConcurrency || 4; // default to 4 if unknown
+  const cores = (typeof navigator !== 'undefined' && navigator.hardwareConcurrency) ? navigator.hardwareConcurrency : 4;
   if (cores < 4) lowVotes++;
   else if (cores < 8) midVotes++;
   else highVotes++;
 
   // 2. Device memory (non-standard, Chrome/Edge only)
-  const memory = (navigator as any).deviceMemory as number | undefined;
+  const memory = typeof navigator !== 'undefined' ? (navigator as any).deviceMemory as number | undefined : undefined;
   if (memory !== undefined) {
     if (memory < 4) lowVotes++;
     else if (memory < 8) midVotes++;
@@ -76,7 +77,7 @@ function computeTier(): DeviceTierInfo {
     tier = 'MEDIUM';
   }
 
-  const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+  const isTouchDevice = typeof window !== 'undefined' && ('ontouchstart' in window || (typeof navigator !== 'undefined' && navigator.maxTouchPoints > 0));
 
   return { tier, isTouchDevice, prefersReducedMotion: false };
 }

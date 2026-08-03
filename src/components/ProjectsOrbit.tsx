@@ -361,60 +361,64 @@ export default function ProjectsOrbit() {
         scrub: 1.2, // damped follow — smooths raw scroll input on its own
         pin: true,
         onUpdate: (self) => {
-          const progress = self.progress;
-          // Mathematically perfect rotation to reach the final card
-          const totalRotation = -(totalCards - 1) * angleIncrement;
-          const currentRotorAngle = progress * totalRotation;
+          try {
+            const progress = self.progress;
+            // Mathematically perfect rotation to reach the final card
+            const totalRotation = -(totalCards - 1) * angleIncrement;
+            const currentRotorAngle = progress * totalRotation;
 
-          let closestIndex = 0;
-          let minDiff = Infinity;
+            let closestIndex = 0;
+            let minDiff = Infinity;
 
-          for (let i = 0; i < totalCards; i++) {
-            const cardBaseAngle = i * angleIncrement;
-            let worldAngle = (cardBaseAngle + currentRotorAngle) % 360;
-            if (worldAngle < 0) worldAngle += 360;
+            for (let i = 0; i < totalCards; i++) {
+              const cardBaseAngle = i * angleIncrement;
+              let worldAngle = (cardBaseAngle + currentRotorAngle) % 360;
+              if (worldAngle < 0) worldAngle += 360;
 
-            const diff = Math.min(worldAngle, 360 - worldAngle);
-            if (diff < minDiff) {
-              minDiff = diff;
-              closestIndex = i;
+              const diff = Math.min(worldAngle, 360 - worldAngle);
+              if (diff < minDiff) {
+                minDiff = diff;
+                closestIndex = i;
+              }
+
+              const card = cardEls[i];
+              if (!card) continue;
+
+              // Adaptive depth cue: Opacity + scale only for maximum performance
+              const opacity = gsap.utils.mapRange(0, 45, 1, 0.05, Math.min(diff, 45));
+              const scale = gsap.utils.mapRange(0, 45, 1, 0.9, Math.min(diff, 45));
+
+              gsap.set(card, { opacity, scale, force3D: true });
             }
 
-            const card = cardEls[i];
-            if (!card) continue;
-
-            // Adaptive depth cue: Opacity + scale only for maximum performance
-            const opacity = gsap.utils.mapRange(0, 45, 1, 0.05, Math.min(diff, 45));
-            const scale = gsap.utils.mapRange(0, 45, 1, 0.9, Math.min(diff, 45));
-
-            gsap.set(card, { opacity, scale, force3D: true });
-          }
-
-          // Dynamic DNA Helix opacity: dim when a card is front-and-center (minDiff ~0), restore when transitioning
-          const helixOpacity = gsap.utils.mapRange(0, 15, 0.35, 1, Math.min(minDiff, 15));
-          if (dnaContainerRef.current) {
-            gsap.set(dnaContainerRef.current, { opacity: helixOpacity, force3D: true });
-          }
-
-          // Only touch the DOM for cards whose active state actually changed —
-          // no React setState here, so no re-render cascade on every tick.
-          if (closestIndex !== activeIndexRef.current) {
-            const prevCard = cardEls[activeIndexRef.current];
-            const nextCard = cardEls[closestIndex];
-
-            prevCard?.classList.remove('is-active');
-            nextCard?.classList.add('is-active');
-
-            if (nextCard) {
-              gsap.fromTo(
-                nextCard,
-                { scale: 0.95 },
-                { scale: 1, duration: 0.7, ease: 'elastic.out(1, 0.6)', overwrite: 'auto' }
-              );
+            // Dynamic DNA Helix opacity: dim when a card is front-and-center (minDiff ~0), restore when transitioning
+            const helixOpacity = gsap.utils.mapRange(0, 15, 0.35, 1, Math.min(minDiff, 15));
+            if (dnaContainerRef.current) {
+              gsap.set(dnaContainerRef.current, { opacity: helixOpacity, force3D: true });
             }
 
-            activeIndexRef.current = closestIndex;
-            setActiveCardIndex(closestIndex);
+            // Only touch the DOM for cards whose active state actually changed —
+            // no React setState here, so no re-render cascade on every tick.
+            if (closestIndex !== activeIndexRef.current) {
+              const prevCard = cardEls[activeIndexRef.current];
+              const nextCard = cardEls[closestIndex];
+
+              prevCard?.classList.remove('is-active');
+              nextCard?.classList.add('is-active');
+
+              if (nextCard) {
+                gsap.fromTo(
+                  nextCard,
+                  { scale: 0.95 },
+                  { scale: 1, duration: 0.7, ease: 'elastic.out(1, 0.6)', overwrite: 'auto' }
+                );
+              }
+
+              activeIndexRef.current = closestIndex;
+              setActiveCardIndex(closestIndex);
+            }
+          } catch (e) {
+            console.error('ProjectsOrbit onUpdate error:', e);
           }
         },
       },
