@@ -167,7 +167,7 @@ export default function HeroSection() {
     if (philRef.current) gsap.set(philRef.current, getTransform(p, 0.651, 0.68, 0.75, 0.78));
     if (closeRef.current) gsap.set(closeRef.current, getTransform(p, 0.826, 0.86, null, null));
 
-  }, [scrollPercentage, animKeys]);
+  }, [scrollPercentage, animKeys, isReady]);
 
   // While quality context initializes (isReady=false), render a bare dark shell.
   // ScrollyVideo will NOT mount until isReady — this prevents 46MB video loading before
@@ -203,7 +203,7 @@ export default function HeroSection() {
       {/* MED/HIGH tier: useWebCodecs=true (faster frame decode via WebCodecs API) */}
       <div className="absolute inset-0 [&_canvas]:!object-cover [&_canvas]:!object-[75%_center] sm:[&_canvas]:!object-[right_center] [&_video]:!object-cover [&_video]:!object-[75%_center] sm:[&_video]:!object-[right_center]">
         <ScrollyVideo
-          src="/videos/full_site_intro_sequence.mp4"
+          src="/videos/full_site_intro_720p.mp4"
           useWebCodecs={useWebCodecs && process.env.NODE_ENV === 'production'}
           cover={true}
           sticky={true}
@@ -281,7 +281,7 @@ export default function HeroSection() {
               </div>
 
               {/* PHASE 1: Eyebrow */}
-              <div ref={eyebrowRef} className="absolute inset-0 flex flex-col justify-center pointer-events-none">
+              <div ref={eyebrowRef} className="absolute inset-0 flex flex-col justify-center pointer-events-none opacity-0">
                 {animKeys.phase1 > 0 && (
                   <BlurText
                     key={`p1-${animKeys.phase1}`}
@@ -295,7 +295,7 @@ export default function HeroSection() {
               </div>
 
               {/* PHASE 2: Headline */}
-              <div ref={headlineRef} className="absolute inset-0 flex flex-col justify-center pointer-events-none">
+              <div ref={headlineRef} className="absolute inset-0 flex flex-col justify-center pointer-events-none opacity-0">
                 <div
                   className="leading-[1.05] tracking-tighter"
                   style={{
@@ -324,7 +324,7 @@ export default function HeroSection() {
               </div>
 
               {/* PHASE 3: Sub-headline */}
-              <div ref={subHeadlineRef} className="absolute inset-0 flex flex-col justify-center pointer-events-none">
+              <div ref={subHeadlineRef} className="absolute inset-0 flex flex-col justify-center pointer-events-none opacity-0">
                 {animKeys.phase3 > 0 && (
                   <div style={{ fontSize: 'clamp(16px, 1.8vw, 20px)' }}>
                     <BlurText
@@ -340,7 +340,7 @@ export default function HeroSection() {
               </div>
 
               {/* PHASE 4: CTA Buttons */}
-              <div ref={ctaRef} className="absolute inset-0 flex flex-col justify-center pointer-events-none">
+              <div ref={ctaRef} className="absolute inset-0 flex flex-col justify-center pointer-events-none opacity-0">
                 <div className="flex flex-wrap items-center gap-6">
                   <FadeUp playKey={animKeys.phase4} delay={0}>
                     <a
@@ -370,7 +370,7 @@ export default function HeroSection() {
               {/* ════════════════════════════════════════════════════════════ */}
 
               {/* PHASE 6: WHO I AM */}
-              <div ref={whoRef} className="absolute inset-0 flex flex-col justify-center pointer-events-none">
+              <div ref={whoRef} className="absolute inset-0 flex flex-col justify-center pointer-events-none opacity-0">
                 <p
                   className="text-[12px] uppercase tracking-[0.3em] font-bold text-[#d97757] mb-3"
                   style={{ fontFamily: 'var(--font-mono, monospace)', textShadow: '0 2px 12px rgba(0,0,0,0.8)' }}
@@ -403,7 +403,7 @@ export default function HeroSection() {
               </div>
 
               {/* PHASE 7: CURRENT WORK */}
-              <div ref={workRef} className="absolute inset-0 flex flex-col justify-center pointer-events-none">
+              <div ref={workRef} className="absolute inset-0 flex flex-col justify-center pointer-events-none opacity-0">
                 <p
                   className="text-[12px] uppercase tracking-[0.3em] font-bold text-[#2dd4bf] mb-3"
                   style={{ fontFamily: 'var(--font-mono, monospace)', textShadow: '0 2px 12px rgba(0,0,0,0.8)' }}
@@ -436,7 +436,7 @@ export default function HeroSection() {
               </div>
 
               {/* PHASE 8: PHILOSOPHY */}
-              <div ref={philRef} className="absolute inset-0 flex flex-col justify-center pointer-events-none">
+              <div ref={philRef} className="absolute inset-0 flex flex-col justify-center pointer-events-none opacity-0">
                 <p
                   className="text-[12px] uppercase tracking-[0.3em] font-bold text-[#d97757] mb-3"
                   style={{ fontFamily: 'var(--font-mono, monospace)', textShadow: '0 2px 12px rgba(0,0,0,0.8)' }}
@@ -469,7 +469,7 @@ export default function HeroSection() {
               </div>
 
               {/* PHASE 9: CLOSING / TRANSITION */}
-              <div ref={closeRef} className="absolute inset-0 flex flex-col justify-center pointer-events-none">
+              <div ref={closeRef} className="absolute inset-0 flex flex-col justify-center pointer-events-none opacity-0">
                 <div
                   className="leading-[1.1] tracking-tight"
                   style={{
