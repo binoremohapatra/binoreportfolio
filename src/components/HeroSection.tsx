@@ -67,30 +67,13 @@ export default function HeroSection() {
   const [scrollPercentage, setScrollPercentage] = useState(0);
   const sectionRef = useRef<HTMLDivElement>(null);
 
-  const { tier, allowScrollScrub, isReady } = useAdaptiveQuality();
+  const { tier, useWebCodecs, isReady } = useAdaptiveQuality();
 
   useEffect(() => {
-    // 'high' + allowScrollScrub: ScrollyVideo's own onChange drives scrollPercentage.
-    if (tier === 'high' && allowScrollScrub) return;
-
-    // 'low': section is 100vh — set to mid-point so phase0 text is visible
-    if (tier === 'low') {
-      setScrollPercentage(0.5);
-      return;
-    }
-
-    // 'medium': manual ScrollTrigger (looping video has no onChange callback)
-    if (sectionRef.current) {
-      const st = ScrollTrigger.create({
-        trigger: sectionRef.current,
-        start: 'top top',
-        end: 'bottom bottom',
-        scrub: true,
-        onUpdate: (self) => setScrollPercentage(self.progress),
-      });
-      return () => st.kill();
-    }
-  }, [tier, allowScrollScrub]);
+    // ScrollyVideo's onChange callback drives scrollPercentage on all tiers.
+    // No manual ScrollTrigger needed — ScrollyVideo handles its own scroll tracking.
+    // Nothing to set up here; this effect is reserved for future per-tier setup.
+  }, [tier]);
 
   // Track replays based on entering the scroll window
   const [animKeys, setAnimKeys] = useState({
@@ -186,34 +169,26 @@ export default function HeroSection() {
 
   }, [scrollPercentage, animKeys]);
 
-  // LOW tier or not-yet-ready: simple static 100vh section — no scroll, no video decode
-  if (tier === 'low' || !isReady) {
+  // While quality context initializes (isReady=false), render a bare dark shell.
+  // ScrollyVideo will NOT mount until isReady — this prevents 46MB video loading before
+  // we know the device is capable. The shell shows name/CTA immediately.
+  if (!isReady) {
     return (
       <div className="relative w-full h-screen flex items-center" style={{ background: '#0d0f12' }}>
-        {/* Static paused video background — only loads metadata, not full video */}
-        {isReady && (
-          <video
-            src="/videos/full_site_intro_sequence.mp4#t=3"
-            className="absolute inset-0 w-full h-full object-cover object-[75%_center]"
-            muted playsInline preload="metadata"
-          />
-        )}
-        {/* Dark gradient overlay */}
         <div className="absolute inset-0" style={{ background: 'linear-gradient(to right, rgba(13,15,18,0.9) 0%, rgba(13,15,18,0.6) 55%, rgba(13,15,18,0.1) 80%)' }} />
-        {/* Static text — visible immediately, zero scroll dependency */}
         <div className="relative z-10 px-8 sm:px-12 max-w-xl">
           <h1
             className="flex flex-wrap items-center gap-4 font-bold tracking-tighter mb-4"
-            style={{ fontFamily: 'var(--font-mono, monospace)', textShadow: '0 4px 24px rgba(0,0,0,0.6)', fontSize: 'clamp(40px, 10vw, 72px)' }}
+            style={{ fontFamily: 'var(--font-mono, monospace)', fontSize: 'clamp(40px, 10vw, 72px)' }}
           >
             <span className="text-white">BINORE</span>
             <span className="text-[#d97757]">MOHAPATRA</span>
           </h1>
-          <p className="text-xl sm:text-2xl text-white font-sans font-medium mb-3 drop-shadow-md">Full-Stack Developer Intern</p>
+          <p className="text-xl text-white font-sans font-medium mb-3">Full-Stack Developer Intern</p>
           <p className="text-sm font-mono uppercase tracking-wider text-white/70 mb-8">React · Node.js · Spring Boot · Cloud</p>
           <div className="flex flex-wrap gap-4">
-            <a href="#projects" className="inline-flex items-center px-6 py-3 text-sm font-bold text-white bg-[#d97757] rounded-md" style={{ fontFamily: 'var(--font-mono, monospace)' }}>View My Work</a>
-            <a href="#connect" className="inline-flex items-center px-6 py-3 text-sm font-bold text-white/70 border border-white/20 rounded-md" style={{ fontFamily: 'var(--font-mono, monospace)' }}>Get in Touch</a>
+            <a href="#projects" className="inline-flex items-center px-6 py-3 text-sm font-bold text-white bg-[#d97757] rounded-md">View My Work</a>
+            <a href="#connect" className="inline-flex items-center px-6 py-3 text-sm font-bold text-white/70 border border-white/20 rounded-md">Get in Touch</a>
           </div>
         </div>
       </div>
@@ -223,29 +198,20 @@ export default function HeroSection() {
   return (
     <div ref={sectionRef} className="relative w-full" style={{ height: '830vh', background: '#0d0f12' }}>
 
-      {/* ── Background Video ── */}
+      {/* ── ScrollyVideo — always mounted on all tiers once isReady ── */}
+      {/* LOW tier: useWebCodecs=false (seek-based scrubbing, no frame-cache extraction) */}
+      {/* MED/HIGH tier: useWebCodecs=true (faster frame decode via WebCodecs API) */}
       <div className="absolute inset-0 [&_canvas]:!object-cover [&_canvas]:!object-[75%_center] sm:[&_canvas]:!object-[right_center] [&_video]:!object-cover [&_video]:!object-[75%_center] sm:[&_video]:!object-[right_center]">
-        {tier === 'high' ? (
-          <ScrollyVideo
-            src="/videos/full_site_intro_sequence.mp4"
-            useWebCodecs={process.env.NODE_ENV === 'production'}
-            cover={true}
-            sticky={true}
-            full={true}
-            trackScroll={true}
-            transitionSpeed={12}
-            onChange={(percentage: number) => setScrollPercentage(percentage)}
-          />
-        ) : (
-          /* medium: looping video — text phases driven by manual ScrollTrigger */
-          <div className="sticky top-0 w-full h-screen overflow-hidden">
-            <video
-              src="/videos/full_site_intro_sequence.mp4"
-              className="w-full h-full object-cover object-[75%_center] sm:object-[right_center]"
-              autoPlay loop muted playsInline
-            />
-          </div>
-        )}
+        <ScrollyVideo
+          src="/videos/full_site_intro_sequence.mp4"
+          useWebCodecs={useWebCodecs && process.env.NODE_ENV === 'production'}
+          cover={true}
+          sticky={true}
+          full={true}
+          trackScroll={true}
+          transitionSpeed={tier === 'low' ? 4 : tier === 'medium' ? 8 : 12}
+          onChange={(percentage: number) => setScrollPercentage(percentage)}
+        />
       </div>
 
       {/* Overlay Container */}

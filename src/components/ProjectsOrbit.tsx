@@ -318,6 +318,60 @@ function ActiveOnlyIframe({ url }: { url: string }) {
 }
 
 export default function ProjectsOrbit() {
+  const { allow3DOrbit } = useAdaptiveQuality();
+
+  // LOW tier: flat grid — no 3D orbit, no WebGL, no iframes.
+  // Hooks are NOT violated because this is the top of the component,
+  // and allow3DOrbit comes from context (no hook after the return).
+  if (!allow3DOrbit) {
+    return (
+      <section id="projects" className="relative w-full py-20 px-4 sm:px-8" style={{ background: '#a8adac' }}>
+        <div className="max-w-5xl mx-auto">
+          <p className="text-[10px] uppercase tracking-[0.35em] font-bold text-[#0d0f12]/60 mb-2 font-mono">Projects</p>
+          <h2 className="text-3xl sm:text-4xl font-bold text-[#0d0f12] mb-10" style={{ fontFamily: 'var(--font-mono, monospace)' }}>
+            Things I&apos;ve built.
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {PROJECTS.map((project) => {
+              const config = PLACEHOLDER_CONFIG[project.title] || { ...DEFAULT_PLACEHOLDER, label: project.category.toUpperCase() };
+              const Icon = config.icon;
+              return (
+                <a
+                  key={project.id}
+                  href={project.link || project.github || '#'}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group relative flex flex-col gap-3 rounded-xl p-5 border border-white/10 hover:border-white/20 transition-all duration-300 overflow-hidden"
+                  style={{ background: '#0d0f12' }}
+                >
+                  <div className="absolute top-0 left-0 right-0 h-[2px]" style={{ background: `linear-gradient(to right, ${config.color}80, transparent)` }} />
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <p className="text-[9px] uppercase tracking-[0.2em] font-mono mb-1" style={{ color: config.color, opacity: 0.8 }}>{config.label}</p>
+                      <h3 className="text-sm font-bold text-white group-hover:text-[#d97757] transition-colors duration-300 font-mono">{project.title}</h3>
+                    </div>
+                    <Icon size={20} style={{ color: config.color, opacity: 0.7, flexShrink: 0 }} />
+                  </div>
+                  <p className="text-[11px] text-white/40 font-mono uppercase tracking-wide">{project.category}</p>
+                  <div className="flex gap-3 mt-auto">
+                    {project.link && <span className="text-[10px] text-[#2dd4bf]/70 font-mono uppercase tracking-wide">↗ Live</span>}
+                    {project.github && <span className="text-[10px] text-white/40 font-mono uppercase tracking-wide">GitHub</span>}
+                  </div>
+                </a>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  // Medium/High: full 3D orbit
+  return <ProjectsOrbit3D />;
+}
+
+// ─── Full 3D Orbit (MEDIUM + HIGH tier) ─────────────────────────────────────
+function ProjectsOrbit3D() {
   const containerRef = useRef<HTMLDivElement>(null);
   const rotorRef = useRef<HTMLDivElement>(null);
   const cardsRef = useRef<(HTMLDivElement | null)[]>([]);
@@ -325,7 +379,6 @@ export default function ProjectsOrbit() {
   const activeIndexRef = useRef<number>(0);
   const [activeCardIndex, setActiveCardIndex] = useState(0);
   const { tier, allowWebGL, allowLiveIframes } = useAdaptiveQuality();
-  // Derive helpers from tier string (isTouchDevice and prefersReducedMotion still useful for animation)
   const isTouchDevice = typeof window !== 'undefined' && ('ontouchstart' in window || navigator.maxTouchPoints > 0);
   const prefersReducedMotion = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 

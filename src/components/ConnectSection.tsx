@@ -247,7 +247,7 @@ export default function ConnectSection() {
   const [scrollPercentage, setScrollPercentage] = useState(0);
   const sectionRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const { tier, allowScrollScrub, isReady } = useAdaptiveQuality();
+  const { tier, useWebCodecs, isReady } = useAdaptiveQuality();
 
   // Phase keys — same pattern as Hero (re-triggers animation on entering window)
   const [animKeys, setAnimKeys] = useState({
@@ -272,44 +272,31 @@ export default function ConnectSection() {
   const footerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // LOW tier: no scroll dependency
-    if (tier === 'low' || !isReady) return;
+    // While not ready, don't set up anything
+    if (!isReady) return;
 
-    // 1. Setup video scrubbing and general scroll tracking
     const section = sectionRef.current;
-    
     if (section) {
-      // Create a timeline for tracking scroll progress
       const st = ScrollTrigger.create({
         trigger: section,
         start: 'top top',
         end: 'bottom bottom',
         scrub: true,
         onUpdate: (self) => {
-          // Provide the scroll percentage to the rest of the component
           setScrollPercentage(self.progress);
-          
-          if (tier === 'high') {
-            // Scrub the video directly safely to prevent main-thread lockups
-            const video = videoRef.current;
-            if (video && video.duration && video.readyState >= 2) {
-              // Only seek if the video is not currently busy seeking, otherwise decoder hangs
-              if (!video.seeking) {
-                requestAnimationFrame(() => {
-                  video.currentTime = self.progress * video.duration;
-                });
-              }
-            }
+
+          // Scrub the hands video on ALL tiers (hardware-accelerated on all devices)
+          const video = videoRef.current;
+          if (video && video.duration && video.readyState >= 2 && !video.seeking) {
+            requestAnimationFrame(() => {
+              video.currentTime = self.progress * video.duration;
+            });
           }
         }
       });
-
-      // Cleanup
-      return () => {
-        st.kill();
-      };
+      return () => st.kill();
     }
-  }, [tier, isReady]);
+  }, [isReady]);
 
   useEffect(() => {
     // 2. Handle text/opacity animations based on scrollPercentage
@@ -363,14 +350,17 @@ export default function ConnectSection() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [scrollPercentage]);
 
-  // ── LOW tier: simple static section with IntersectionObserver-based reveal ──
-  if (tier === 'low' || !isReady) {
+  // While quality context initializes, show a minimal shell so name/links are visible
+  if (!isReady) {
     return (
-      <LowTierConnectSection
-        animKeys={animKeys}
-        setAnimKeys={setAnimKeys}
-        SOCIAL_LINKS={SOCIAL_LINKS}
-      />
+      <div id="connect" className="relative w-full min-h-screen flex flex-col items-center justify-center gap-8 px-8 py-24" style={{ background: '#0d0f12' }}>
+        <h2 className="font-bold text-white text-center" style={{ fontFamily: 'var(--font-mono, monospace)', fontSize: 'clamp(32px, 8vw, 56px)' }}>Let&apos;s build something.</h2>
+        <div className="flex flex-wrap justify-center gap-8">
+          <a href={SOCIAL_LINKS.github} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 text-white/50 hover:text-[#d97757] transition-colors"><GitHubIcon size={22} /><span className="text-[11px] uppercase tracking-[0.25em] font-bold font-mono">GitHub</span></a>
+          <a href={SOCIAL_LINKS.whatsapp} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 text-white/50 hover:text-[#d97757] transition-colors"><WhatsAppIcon size={22} /><span className="text-[11px] uppercase tracking-[0.25em] font-bold font-mono">WhatsApp</span></a>
+          <a href={SOCIAL_LINKS.linkedin} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 text-white/50 hover:text-[#d97757] transition-colors"><LinkedInIcon size={22} /><span className="text-[11px] uppercase tracking-[0.25em] font-bold font-mono">LinkedIn</span></a>
+        </div>
+      </div>
     );
   }
 
