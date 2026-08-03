@@ -672,8 +672,8 @@ function ExperienceCard({ node, pos, index, isMobile, setTextBlockRef }: any) {
 
             {/* Title */}
             <h3
-              className="text-xl sm:text-2xl font-bold tracking-tight mb-3 leading-tight"
-              style={{ fontFamily: 'var(--font-mono, monospace)', color: '#181a1b' }}
+              className="text-xl sm:text-2xl font-bold tracking-tight mb-3 leading-tight text-white"
+              style={{ fontFamily: 'var(--font-mono, monospace)' }}
             >
               {node.title}
             </h3>
@@ -686,8 +686,8 @@ function ExperienceCard({ node, pos, index, isMobile, setTextBlockRef }: any) {
 
             {/* Description */}
             <p
-              className="text-[14px] leading-relaxed mb-6"
-              style={{ fontFamily: 'var(--font-mono, monospace)', color: '#181a1b' }}
+              className="text-[14px] leading-relaxed mb-6 text-white/90"
+              style={{ fontFamily: 'var(--font-mono, monospace)' }}
             >
               {node.description}
             </p>
