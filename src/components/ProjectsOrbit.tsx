@@ -358,7 +358,7 @@ export default function ProjectsOrbit() {
         trigger: containerRef.current,
         start: 'top top',
         end: `+=${totalCards * 350}`,
-        scrub: 1.2, // damped follow — smooths raw scroll input on its own
+        scrub: tier === 'LOW' ? 2.5 : 1.2, // increased smoothing on LOW tier to absorb frame drops
         pin: true,
         onUpdate: (self) => {
           try {
@@ -383,6 +383,19 @@ export default function ProjectsOrbit() {
 
               const card = cardEls[i];
               if (!card) continue;
+
+              if (tier === 'LOW') {
+                if (diff >= 45) {
+                  // Only set it once when it crosses the threshold to avoid redundant GSAP sets per frame
+                  if (!card.dataset.isFar) {
+                    gsap.set(card, { opacity: 0.05, scale: 0.9, force3D: true });
+                    card.dataset.isFar = 'true';
+                  }
+                  continue;
+                } else {
+                  card.dataset.isFar = '';
+                }
+              }
 
               // Adaptive depth cue: Opacity + scale only for maximum performance
               const opacity = gsap.utils.mapRange(0, 45, 1, 0.05, Math.min(diff, 45));
@@ -471,15 +484,17 @@ export default function ProjectsOrbit() {
         TIER: {tier} | {debugInfo}
       </div>
 
-      {/* Grain overlay */}
-      <div className="absolute inset-0 z-0 pointer-events-none mix-blend-overlay opacity-10">
-        <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
-          <filter id="projectsNoiseFilter">
-            <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch" />
-          </filter>
-          <rect width="100%" height="100%" filter="url(#projectsNoiseFilter)" />
-        </svg>
-      </div>
+      {/* Grain overlay (Disabled on LOW tier as SVG filters are expensive on mobile GPUs) */}
+      {tier !== 'LOW' && (
+        <div className="absolute inset-0 z-0 pointer-events-none mix-blend-overlay opacity-10">
+          <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+            <filter id="projectsNoiseFilter">
+              <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch" />
+            </filter>
+            <rect width="100%" height="100%" filter="url(#projectsNoiseFilter)" />
+          </svg>
+        </div>
+      )}
 
       {/* Center label — the DNA helix lives here ONCE */}
       <div
@@ -514,7 +529,7 @@ export default function ProjectsOrbit() {
             {/* Full-bleed preview fills the whole card */}
             <div className="absolute inset-0 z-0">
               {project.link ? (
-                i === activeCardIndex && !(project as any).iframeDisabled ? (
+                i === activeCardIndex && !(project as any).iframeDisabled && tier === 'HIGH' ? (
                   <ActiveOnlyIframe url={project.link} />
                 ) : (
                   // eslint-disable-next-line @next/next/no-img-element
