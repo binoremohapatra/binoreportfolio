@@ -344,6 +344,7 @@ export default function ExperienceConnector() {
     return () => {
       idleAnimRef.current?.kill();
       ctx.revert();
+      nodeActiveStateRef.current = [];
     };
   }, [pathD, nodePositions, nodeScrollRanges, isReducedMotionActive, minZ, maxZ]);
 
