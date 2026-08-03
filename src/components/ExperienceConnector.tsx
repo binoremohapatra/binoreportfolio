@@ -615,9 +615,10 @@ function ExperienceCard({ node, pos, index, isMobile, setTextBlockRef }: any) {
 
         {/* 3. FRONT GLASS PANEL */}
         <div 
-          className="relative w-full h-full p-8 sm:p-10 rounded-md bg-white/10 backdrop-blur-xl border-2 border-[#d97757]/40 text-left overflow-hidden z-10"
+          className="relative w-full h-full p-8 sm:p-10 rounded-md backdrop-blur-md border-2 border-[#d97757]/40 text-left overflow-hidden z-10"
           style={{
-            textShadow: '0 2px 8px rgba(0,0,0,0.9)',
+            backgroundColor: 'rgba(168, 173, 172, 0.15)', // Light grey base (#a8adac)
+            textShadow: '0 2px 12px rgba(0,0,0,0.85), 0 1px 3px rgba(0,0,0,0.9)',
             // Top-edge glass refraction highlight
             boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.15), inset 0 0 0 1px rgba(255,255,255,0.05)',
           }}
