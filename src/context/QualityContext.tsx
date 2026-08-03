@@ -108,7 +108,7 @@ function computeQuality(): QualityInfo {
     // score 2+ -> medium (catches i3/4-core laptops correctly)
     // score 4+ -> high
     const tier: QualityTier = score >= 4 ? 'high' : score >= 2 ? 'medium' : 'low';
-    console.log('[Quality] ' + tier + ' (cores=' + cores + ' mem=' + (memory ?? 'n/a') + ' vw=' + vw + ' score=' + score + ')');
+    console.log('[Quality] Base spec: ' + tier + ' (cores=' + cores + ' mem=' + (memory ?? 'n/a') + ' vw=' + vw + ' score=' + score + ')');
     return tierToFlags(tier);
   } catch (e) {
     console.warn('[Quality] Detection error, defaulting low:', e);
@@ -116,12 +116,75 @@ function computeQuality(): QualityInfo {
   }
 }
 
+/**
+ * Runs a non-blocking requestAnimationFrame loop to measure actual device capability.
+ * If 10 frames take significantly longer than expected (~166ms at 60fps), it indicates 
+ * the device is struggling with basic React hydration and DOM painting, so we downgrade it.
+ */
+function runFrameProbe(initialTier: QualityTier): Promise<QualityTier> {
+  return new Promise((resolve) => {
+    // If it's already low based on specs (e.g. mobile width), no need to probe and delay
+    if (initialTier === 'low') {
+      return resolve('low');
+    }
+
+    const TARGET_FRAMES = 10;
+    // 10 frames @ 60fps = ~166ms. >250ms means <40fps during startup.
+    const MAX_DURATION_MS = 250; 
+    
+    let frameCount = 0;
+    let startTime = 0;
+
+    const tick = (now: DOMHighResTimeStamp) => {
+      if (startTime === 0) {
+        startTime = now;
+        requestAnimationFrame(tick);
+        return;
+      }
+
+      frameCount++;
+      if (frameCount >= TARGET_FRAMES) {
+        const duration = now - startTime;
+        console.log(`[Quality] rAF probe: ${TARGET_FRAMES} frames in ${Math.round(duration)}ms`);
+        
+        if (duration > MAX_DURATION_MS) {
+          console.warn('[Quality] Device is dropping frames on load. Downgrading to low tier.');
+          resolve('low');
+        } else {
+          resolve(initialTier);
+        }
+      } else {
+        requestAnimationFrame(tick);
+      }
+    };
+
+    requestAnimationFrame(tick);
+  });
+}
+
 export function QualityProvider({ children }: { children: React.ReactNode }) {
   const [quality, setQuality] = useState<QualityInfo>(defaultQuality);
 
   useEffect(() => {
-    // Runs exactly once after first client render - no repeated calls
-    setQuality(computeQuality());
+    let isMounted = true;
+    
+    const initQuality = async () => {
+      // 1. Compute baseline tier from hardware specs
+      const baseTier = computeQuality().tier;
+      
+      // 2. Measure actual performance via rAF
+      const finalTier = await runFrameProbe(baseTier);
+      
+      if (isMounted) {
+        setQuality(tierToFlags(finalTier));
+      }
+    };
+    
+    initQuality();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   return (

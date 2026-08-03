@@ -150,7 +150,7 @@ const PROJECTS = [
 // 3D DNA Helix — rendered via React Three Fiber.
 // ---------------------------------------------------------------------------
 
-function DnaWrapper({ tier, allowWebGL }: { tier: string; allowWebGL: boolean }) {
+const DnaWrapper = React.memo(function DnaWrapper({ tier, allowWebGL }: { tier: string; allowWebGL: boolean }) {
   const [webglSupported, setWebglSupported] = useState<boolean | null>(null);
 
   useEffect(() => {
@@ -183,7 +183,7 @@ function DnaWrapper({ tier, allowWebGL }: { tier: string; allowWebGL: boolean })
   }
 
   return <DnaCanvas fallbackSvg={<DnaHelixSvg />} />;
-}
+});
 
 // ---------------------------------------------------------------------------
 
