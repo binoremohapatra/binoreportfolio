@@ -7,6 +7,7 @@ import BlurText from '@/components/ui/reactbits/BlurText';
 import TextType from '@/components/ui/reactbits/TextType';
 // @ts-ignore
 import ScrollyVideo from 'scrolly-video/dist/ScrollyVideo.esm.jsx';
+import { useDeviceTier } from '@/hooks/useDeviceTier';
 
 const windowOpacity = (p: number, enterStart: number, enterEnd: number, exitStart: number | null, exitEnd: number | null) => {
   if (p < enterStart) return 0;
