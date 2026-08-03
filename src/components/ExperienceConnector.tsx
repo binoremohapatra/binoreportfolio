@@ -55,7 +55,7 @@ const EXPERIENCE_NODES: ExperienceNode[] = [
     title: 'Suvidha Foundation',
     description:
       'Full-Stack Developer Intern. Built Research Connect — a real-time research collaboration platform connecting researchers across institutions.',
-    tech: 'Next.js · Spring Boot · PostgreSQL · WebSockets',
+    tech: 'React · Node.js · MongoDB · WebSockets · Google Scholar API',
     side: 'right',
     baseZ: 40,
   }
