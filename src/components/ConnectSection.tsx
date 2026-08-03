@@ -248,6 +248,7 @@ export default function ConnectSection() {
   const sectionRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const { tier, useWebCodecs, isReady } = useAdaptiveQuality();
+  const marqueeRef = useRef<HTMLDivElement>(null);
 
   // Phase keys — same pattern as Hero (re-triggers animation on entering window)
   const [animKeys, setAnimKeys] = useState({
@@ -296,6 +297,32 @@ export default function ConnectSection() {
       });
       return () => st.kill();
     }
+  }, [isReady]);
+
+  useEffect(() => {
+    if (!isReady || !marqueeRef.current) return;
+    
+    const certs = marqueeRef.current.querySelectorAll('.cert-card-animate');
+    if (certs.length === 0) return;
+
+    // Use a small timeout to let the DOM settle so cards have physical dimensions for GSAP
+    const timer = setTimeout(() => {
+      const st = ScrollTrigger.create({
+        trigger: marqueeRef.current,
+        start: 'top 85%',
+        once: true,
+        onEnter: () => {
+          gsap.fromTo(
+            certs,
+            { opacity: 0, scale: 0.96, y: 12 },
+            { opacity: 1, scale: 1, y: 0, duration: 0.8, stagger: 0.1, ease: 'power3.out' }
+          );
+        },
+      });
+      return () => st.kill();
+    }, 100);
+
+    return () => clearTimeout(timer);
   }, [isReady]);
 
   useEffect(() => {
@@ -376,12 +403,12 @@ export default function ConnectSection() {
         className="absolute top-0 left-0 right-0 h-[180px] z-[5] overflow-hidden flex flex-col justify-center"
         style={{ background: 'linear-gradient(to bottom, #a8adac 0%, #646868 35%, #0d0f12 100%)' }}
       >
-        <p className="text-center text-white/50 text-[10px] tracking-[0.3em] font-mono uppercase mb-4">
+        <p className="text-center text-[#181a1b] text-[12px] sm:text-[14px] tracking-[0.3em] font-bold font-mono uppercase mb-4">
           Certifications & Accolades
         </p>
         
         {/* Infinite CSS Marquee */}
-        <div className="relative w-full flex overflow-hidden group">
+        <div className="relative w-full flex overflow-hidden group" ref={marqueeRef}>
           <style>{`
             @keyframes scroll-left {
               from { transform: translateX(0); }
@@ -410,25 +437,37 @@ export default function ConnectSection() {
                   return (
                     <div
                       key={`${i}-${j}`}
-                      className="group/cert relative flex flex-col justify-center px-6 py-4 min-w-[280px] rounded-2xl bg-[#111315] border border-white/10 backdrop-blur-md shadow-[0_8px_30px_rgb(0,0,0,0.4)] transition-all duration-300 hover:-translate-y-1 hover:bg-[#181a1d] hover:border-white/20 hover:shadow-[0_15px_40px_rgba(45,212,191,0.15)] cursor-default overflow-hidden"
+                      className="cert-card-animate group/cert relative flex flex-col justify-center px-6 py-5 min-w-[280px] rounded-md bg-black/30 backdrop-blur-lg border-2 border-[#d97757]/30 transition-all duration-300 hover:-translate-y-1 hover:bg-black/20 hover:border-[#d97757]/60 cursor-default overflow-hidden"
+                      style={{
+                        boxShadow: `
+                          inset 0 1px 0 rgba(255, 255, 255, 0.05),
+                          0 0 0 1px rgba(217, 119, 87, 0.15),
+                          0 8px 24px rgba(0, 0, 0, 0.5),
+                          0 20px 40px rgba(0, 0, 0, 0.4)
+                        `,
+                        opacity: 0, // initially hidden, GSAP reveals them
+                      }}
                     >
+                      {/* Inner glass refraction border */}
+                      <div className="absolute inset-0 border border-white/5 rounded-md pointer-events-none" />
+
                       {/* Subtle gradient glow behind the text */}
-                      <div className="absolute inset-0 bg-gradient-to-br from-teal-500/10 to-transparent opacity-0 group-hover/cert:opacity-100 transition-opacity duration-500" />
+                      <div className="absolute inset-0 bg-gradient-to-br from-[#d97757]/10 to-transparent opacity-0 group-hover/cert:opacity-100 transition-opacity duration-500 pointer-events-none" />
                       
                       <div className="flex items-center gap-4 relative z-10">
-                        <div className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center shrink-0 group-hover/cert:bg-teal-500/20 group-hover/cert:border-teal-500/30 transition-colors duration-300 shadow-inner">
-                          <div className="w-2 h-2 rounded-full bg-teal-400 group-hover/cert:animate-pulse group-hover/cert:shadow-[0_0_10px_2px_rgba(45,212,191,0.6)]" />
+                        <div className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center shrink-0 group-hover/cert:bg-[#d97757]/20 group-hover/cert:border-[#d97757]/30 transition-colors duration-300 shadow-inner">
+                          <div className="w-2 h-2 rounded-full bg-[#d97757] group-hover/cert:animate-pulse group-hover/cert:shadow-[0_0_10px_2px_rgba(217,119,87,0.6)]" />
                         </div>
                         
-                        <div className="flex flex-col gap-0.5">
+                        <div className="flex flex-col gap-0.5" style={{ textShadow: '0 2px 4px rgba(0,0,0,0.8)' }}>
                           <EncryptedText
                             text={title}
                             revealDelayMs={30}
                             flipDelayMs={30}
-                            encryptedClassName="text-teal-400/80 font-mono text-sm"
-                            revealedClassName="text-white font-sans font-bold tracking-tight text-[15px] sm:text-[16px] group-hover/cert:text-teal-300 transition-colors duration-300"
+                            encryptedClassName="text-[#d97757]/80 font-mono text-sm"
+                            revealedClassName="text-white font-mono font-bold tracking-tight text-[15px] sm:text-[16px] group-hover/cert:text-[#f0a080] transition-colors duration-300"
                           />
-                          <span className="text-white/40 font-mono text-[10px] sm:text-[11px] uppercase tracking-[0.15em]">
+                          <span className="text-white/60 font-mono text-[10px] sm:text-[11px] uppercase tracking-[0.15em]">
                             {provider}
                           </span>
                         </div>
