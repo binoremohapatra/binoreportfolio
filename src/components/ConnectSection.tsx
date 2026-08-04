@@ -504,7 +504,7 @@ export default function ConnectSection() {
             className="absolute inset-0 pointer-events-none"
             style={{
               background:
-                'linear-gradient(to right, rgba(13,15,18,0.85) 0%, rgba(13,15,18,0.55) 50%, rgba(13,15,18,0.15) 100%), linear-gradient(to top, rgba(13,15,18,0.7) 0%, transparent 50%)',
+                'linear-gradient(to right, rgba(13,15,18,0.5) 0%, rgba(13,15,18,0.2) 50%, transparent 100%), linear-gradient(to top, rgba(13,15,18,0.4) 0%, transparent 40%)',
             }}
           />
 
