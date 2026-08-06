@@ -5,8 +5,13 @@ import gsap from 'gsap';
 import BlurText from '@/components/ui/reactbits/BlurText';
 import ScrollReveal from '@/components/ui/reactbits/ScrollReveal';
 import SplitText from '@/components/ui/reactbits/SplitText';
+import ShinyText from '@/components/ui/reactbits/ShinyText';
+import { EncryptedText } from '@/components/ui/encrypted-text';
+import { TextGenerateEffect } from '@/components/ui/text-generate-effect';
+import { CountUp } from '@/components/ui/CountUp';
 import { preloadFrames, useScrollVideoScrub } from '@/hooks/useScrollVideoScrub';
 import { useAdaptiveQuality } from '@/hooks/useAdaptiveQuality';
+import { useLenisInstance } from '@/providers/LenisProvider';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -27,20 +32,16 @@ const getTransform = (p: number, enterStart: number, enterEnd: number, exitStart
   return { opacity: op, y: 0 };
 };
 
-function HeroStatText({ value, label, className = "", accentColor = "white" }: { value: string, label: string, className?: string, accentColor?: string }) {
+function HeroStatText({ value, label, playKey, delay = 0, className = "", accentColor = "white" }: { value: string, label: string, playKey: number, delay?: number, className?: string, accentColor?: string }) {
+  // If the value contains a number (like "10+" or "8.07"), we can optionally extract it for CountUp.
+  // For simplicity, we'll just render it as is, or we can use a custom renderer if it's purely a number.
+  // We'll update the usages to pass the raw number to CountUp directly in the JSX.
   return (
-    <div className={`flex flex-wrap items-center gap-3 sm:gap-5 pointer-events-auto ${className}`}>
-      <span
-        className="text-[16px] sm:text-[22px] font-bold tracking-tight"
-        style={{ fontFamily: 'var(--font-mono, monospace)', textShadow: '0 4px 20px rgba(0,0,0,0.9)', color: accentColor }}
-      >
+    <div className={`flex flex-col ${className}`}>
+      <span className="text-3xl sm:text-4xl font-black tracking-tighter" style={{ color: accentColor, fontFamily: 'Technor, sans-serif' }}>
         {value}
       </span>
-      <span className="text-white/20 text-[18px] sm:text-[22px] font-mono leading-none hidden sm:inline">|</span>
-      <span
-        className="text-[11px] sm:text-[13px] uppercase tracking-[0.2em] text-white/90 font-sans font-bold"
-        style={{ textShadow: '0 4px 20px rgba(0,0,0,0.9)' }}
-      >
+      <span className="text-[11px] sm:text-[13px] uppercase tracking-[0.2em] text-white/90 font-sans font-bold" style={{ textShadow: '0 4px 20px rgba(0,0,0,0.9)' }}>
         {label}
       </span>
     </div>
@@ -66,25 +67,53 @@ export default function HeroSection() {
   const [scrollPercentage, setScrollPercentage] = useState(0);
   const sectionRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const lenis = useLenisInstance();
+
+  const handleScrollTo = (e: React.MouseEvent<HTMLAnchorElement>, target: string) => {
+    e.preventDefault();
+    if (lenis) {
+      lenis.scrollTo(target, { duration: 1.5 });
+    } else {
+      document.querySelector(target)?.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
 
   const { tier, useWebCodecs, isReady } = useAdaptiveQuality();
   const [bitmaps, setBitmaps] = useState<(ImageBitmap | null)[]>([]);
 
   useEffect(() => {
-    if (typeof window !== 'undefined' && window.__heroFrames) {
-      setBitmaps(window.__heroFrames);
-    } else {
-      // Fallback just in case
-      fetch('/frames/hero/meta.json')
-        .then(res => res.json())
-        .then(meta => {
-          const frameCount = meta.count || 300;
+    const checkFrames = () => {
+      if (typeof window !== 'undefined' && window.__heroFrames && window.__heroFrames.length > 0) {
+        setBitmaps(window.__heroFrames);
+        return true;
+      }
+      return false;
+    };
+
+    if (!checkFrames()) {
+      // Poll for the frames until the preloader attaches them to the window
+      const interval = setInterval(() => {
+        if (checkFrames()) {
+          clearInterval(interval);
+        }
+      }, 100);
+
+      // Fallback if it never happens after 10 seconds
+      const timeout = setTimeout(() => {
+        clearInterval(interval);
+        if (!window.__heroFrames) {
+          const frameCount = 300;
           const urls = Array.from({ length: frameCount }, (_, i) =>
             `/frames/hero/frame_${String(i + 1).padStart(4, '0')}.jpg`
           );
           preloadFrames(urls).then(setBitmaps);
-        })
-        .catch(err => console.error('Failed to load hero frames meta:', err));
+        }
+      }, 10000);
+
+      return () => {
+        clearInterval(interval);
+        clearTimeout(timeout);
+      };
     }
   }, []);
 
@@ -94,7 +123,6 @@ export default function HeroSection() {
 
   // Track replays based on entering the scroll window
   const [animKeys, setAnimKeys] = useState({
-    phase0: 1,
     phase1: 0,
     phase2: 0,
     phase3: 0,
@@ -103,11 +131,14 @@ export default function HeroSection() {
     phase6: 0,
     phase7: 0,
     phase8: 0,
-    phase9: 0
+    phase9: 0,
+    phase10: 0,
+    phase11: 0,
+    phase12: 0,
+    phase13: 0
   });
 
   const playedRefs = useRef({
-    phase0: true, // starts visible
     phase1: false,
     phase2: false,
     phase3: false,
@@ -116,19 +147,17 @@ export default function HeroSection() {
     phase6: false,
     phase7: false,
     phase8: false,
-    phase9: false
+    phase9: false,
+    phase10: false,
+    phase11: false,
+    phase12: false,
+    phase13: false
   });
 
-  const introRef = useRef<HTMLDivElement>(null);
-  const eyebrowRef = useRef<HTMLDivElement>(null);
-  const headlineRef = useRef<HTMLDivElement>(null);
-  const subHeadlineRef = useRef<HTMLDivElement>(null);
-  const ctaRef = useRef<HTMLDivElement>(null);
-  const hudRef = useRef<HTMLDivElement>(null);
-  const whoRef = useRef<HTMLDivElement>(null);
-  const workRef = useRef<HTMLDivElement>(null);
-  const philRef = useRef<HTMLDivElement>(null);
-  const closeRef = useRef<HTMLDivElement>(null);
+  const beatARef = useRef<HTMLDivElement>(null);
+  const beatBRef = useRef<HTMLDivElement>(null);
+  const beatCRef = useRef<HTMLDivElement>(null);
+  const beatDRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const p = scrollPercentage;
@@ -146,43 +175,39 @@ export default function HeroSection() {
       }
     };
 
-    // ── HERO PHASES (0–30.1% of scroll ≈ 0–9.9s of video) ──
-    // Original thresholds × 0.3011 to compress into first 30.1%
-    checkPhase('phase1', 0.036);   // was 0.12
-    checkPhase('phase2', 0.072);   // was 0.24
-    checkPhase('phase3', 0.133);   // was 0.44
-    checkPhase('phase4', 0.181);   // was 0.60
-    checkPhase('phase5', 0.229);   // was 0.76
+    // BEAT A: Entrance
+    checkPhase('phase1', 0.02);
+    checkPhase('phase2', 0.05);
+    checkPhase('phase3', 0.09);
+    checkPhase('phase4', 0.13);
 
-    // ── ABOUT PHASES (30.1–100% of scroll ≈ 9.9–33s of video) ──
-    checkPhase('phase6', 0.301);
-    checkPhase('phase7', 0.476);
-    checkPhase('phase8', 0.651);
-    checkPhase('phase9', 0.826);
+    // BEAT B: Direct Gaze
+    checkPhase('phase5', 0.28);
+    checkPhase('phase6', 0.33);
+    checkPhase('phase7', 0.38);
+
+    // BEAT C: Current Work
+    checkPhase('phase8', 0.53);
+    checkPhase('phase9', 0.57);
+    checkPhase('phase10', 0.63);
+
+    // BEAT D: Philosophy / Close
+    checkPhase('phase11', 0.78);
+    checkPhase('phase12', 0.82);
+    checkPhase('phase13', 0.90);
 
     if (changed) {
       setAnimKeys(newKeys);
     }
 
     // ── Apply outer envelope fades ──
-    // HERO phases — all getTransform values × 0.3011
-    if (introRef.current) gsap.set(introRef.current, getTransform(p, -0.030, 0, 0.024, 0.036));
-    if (eyebrowRef.current) gsap.set(eyebrowRef.current, getTransform(p, 0.036, 0.054, 0.060, 0.072));
-    if (headlineRef.current) gsap.set(headlineRef.current, getTransform(p, 0.072, 0.096, 0.120, 0.133));
-    if (subHeadlineRef.current) gsap.set(subHeadlineRef.current, getTransform(p, 0.133, 0.151, 0.169, 0.181));
-
-    if (ctaRef.current) {
-      const { opacity, y } = getTransform(p, 0.181, 0.199, 0.217, 0.229);
-      gsap.set(ctaRef.current, { opacity, y, pointerEvents: opacity > 0.1 ? 'auto' : 'none' });
+    if (beatARef.current) gsap.set(beatARef.current, getTransform(p, 0.02, 0.05, 0.23, 0.257));
+    if (beatBRef.current) gsap.set(beatBRef.current, getTransform(p, 0.28, 0.33, 0.49, 0.514));
+    if (beatCRef.current) gsap.set(beatCRef.current, getTransform(p, 0.53, 0.57, 0.75, 0.772));
+    if (beatDRef.current) {
+      const { opacity, y } = getTransform(p, 0.78, 0.82, null, null);
+      gsap.set(beatDRef.current, { opacity, y, pointerEvents: opacity > 0.1 ? 'auto' : 'none' });
     }
-
-    if (hudRef.current) gsap.set(hudRef.current, getTransform(p, 0.229, 0.247, 0.275, 0.301));
-
-    // ABOUT phases
-    if (whoRef.current) gsap.set(whoRef.current, getTransform(p, 0.301, 0.33, 0.41, 0.44));
-    if (workRef.current) gsap.set(workRef.current, getTransform(p, 0.476, 0.51, 0.57, 0.60));
-    if (philRef.current) gsap.set(philRef.current, getTransform(p, 0.651, 0.68, 0.75, 0.78));
-    if (closeRef.current) gsap.set(closeRef.current, getTransform(p, 0.826, 0.86, null, null));
 
   }, [scrollPercentage, animKeys, isReady]);
 
@@ -212,320 +237,232 @@ export default function HeroSection() {
 
           {/* SINGLE FIXED-WIDTH COLUMN PINNED LEFT */}
           <div className="absolute top-0 left-0 h-full w-full max-w-xl px-8 sm:px-12 flex flex-col justify-center z-20 pointer-events-none">
-
             <div className="relative w-full h-[300px]">
 
-              {/* PHASE 0: Initial Resume Info */}
-              <div ref={introRef} className="absolute inset-0 flex flex-col justify-center pointer-events-none" style={{ fontFamily: 'Technor, sans-serif' }}>
-                <h1 className="flex flex-wrap items-center gap-4 text-5xl sm:text-7xl font-bold tracking-tighter mb-4" style={{ textShadow: '0 4px 24px rgba(0,0,0,0.6)' }}>
-                  <BlurText
-                    key={`p0-1-${animKeys.phase0}`}
-                    text="BINORE"
-                    delay={40}
-                    animateBy="letters"
-                    direction="top"
-                    className="text-white"
-                  />
-                  <BlurText
-                    key={`p0-2-${animKeys.phase0}`}
-                    text="MOHAPATRA"
-                    delay={40}
-                    animateBy="letters"
-                    direction="top"
-                    className="text-[var(--color-accent)]"
-                  />
-                </h1>
-
-                {animKeys.phase0 > 0 && (
-                  <>
-                    <ScrollReveal
-                      customTriggerRef={sectionRef}
-                      customStart="top top"
-                      customEnd="top -5%"
-                      baseOpacity={0}
-                      baseRotation={0}
-                      blurStrength={10}
-                      textClassName="text-xl sm:text-2xl text-white font-medium mb-5 drop-shadow-md"
-                    >
-                      Full-Stack Developer Intern
-                    </ScrollReveal>
-
-                    <div className="text-[10px] sm:text-xs uppercase tracking-[0.2em] text-white/80 font-bold drop-shadow-md min-h-[30px] overflow-hidden whitespace-nowrap text-ellipsis max-w-full">
-                      <ScrollReveal
-                        customTriggerRef={sectionRef}
-                        customStart="top top"
-                        customEnd="top -10%"
-                        baseOpacity={0}
-                        baseRotation={0}
-                        blurStrength={8}
-                      >
-                        API Development ✦ Cloud Deployment ✦ React ✦ Node.js ✦ Spring Boot
-                      </ScrollReveal>
-                    </div>
-                  </>
-                )}
-              </div>
-
-              {/* PHASE 1: Eyebrow */}
-              <div ref={eyebrowRef} className="absolute inset-0 flex flex-col justify-center pointer-events-none opacity-0">
+              {/* BEAT A: Entrance */}
+              <div ref={beatARef} className="absolute inset-0 flex flex-col justify-center pointer-events-none opacity-0" style={{ fontFamily: 'Technor, sans-serif' }}>
                 {animKeys.phase1 > 0 && (
+                  <div className="mb-4">
+                    <EncryptedText
+                      key={`p1-${animKeys.phase1}`}
+                      text="OPEN TO OPPORTUNITIES · 3RD YEAR B.TECH CSE"
+                      className="tracking-[0.2em] text-[10px] sm:text-xs font-bold uppercase"
+                      encryptedClassName="text-[#e0303d]/60"
+                      revealedClassName="text-[#e0303d]"
+                    />
+                  </div>
+                )}
+
+                {animKeys.phase2 > 0 && (
+                  <h1 className="flex flex-wrap items-center gap-3 sm:gap-4 font-bold tracking-tighter mb-4 text-[clamp(32px,10vw,72px)] leading-none" style={{ textShadow: '0 4px 24px rgba(0,0,0,0.6)' }}>
+                    <BlurText key={`p2a-${animKeys.phase2}`} text="BINORE" delay={40} animateBy="letters" direction="top" className="text-white" />
+                    <FadeUp playKey={animKeys.phase2} delay={200}>
+                      <ShinyText text="MOHAPATRA" speed={3} className="text-[#e0303d]" />
+                    </FadeUp>
+                  </h1>
+                )}
+
+                {animKeys.phase3 > 0 && (
                   <BlurText
-                    key={`p1-${animKeys.phase1}`}
-                    text="Open to opportunities"
-                    delay={30}
+                    key={`p3-${animKeys.phase3}`}
+                    text="FULL-STACK DEVELOPER INTERN"
+                    delay={40}
                     animateBy="words"
                     direction="top"
-                    className="tracking-[0.22em] text-sm font-bold text-[var(--color-accent)] uppercase font-mono"
+                    className="text-xl sm:text-2xl text-white font-bold mb-5 drop-shadow-md"
                   />
                 )}
-              </div>
 
-              {/* PHASE 2: Headline */}
-              <div ref={headlineRef} className="absolute inset-0 flex flex-col justify-center pointer-events-none opacity-0">
-                <div
-                  className="leading-[1.05] tracking-tighter"
-                  style={{
-                    fontFamily: 'Technor, sans-serif',
-                    fontSize: 'clamp(48px, 7vw, 84px)',
-                    color: '#ffffff',
-                    fontWeight: 800,
-                    textShadow: '0 4px 24px rgba(0,0,0,0.6)'
-                  }}
-                >
-                  {animKeys.phase2 > 0 && (
-                    <SplitText
-                      key={`p2-${animKeys.phase2}`}
-                      text="Building Systems That Ship."
-                      delay={40}
-                      duration={1.2}
-                      ease="power3.out"
-                      splitType="chars"
-                      from={{ opacity: 0, y: 30 }}
-                      to={{ opacity: 1, y: 0 }}
-                      tag="h1"
-                      textAlign="left"
-                    />
-                  )}
-                </div>
-              </div>
-
-              {/* PHASE 3: Sub-headline */}
-              <div ref={subHeadlineRef} className="absolute inset-0 flex flex-col justify-center pointer-events-none opacity-0">
-                {animKeys.phase3 > 0 && (
-                  <div style={{ fontSize: 'clamp(16px, 1.8vw, 20px)' }}>
+                {animKeys.phase4 > 0 && (
+                  <div className="text-[10px] sm:text-xs uppercase tracking-[0.2em] text-white/80 font-bold drop-shadow-md min-h-[30px] overflow-hidden whitespace-nowrap text-ellipsis max-w-full">
                     <BlurText
-                      key={`p3-${animKeys.phase3}`}
-                      text="Full-stack developer currently building production systems at two internships simultaneously — from AI-powered advisory tools to real-time research collaboration platforms. Comfortable end-to-end: React, Next.js, Node.js and Spring Boot, shipped and deployed."
-                      delay={30}
+                      key={`p4-${animKeys.phase4}`}
+                      text="API DEVELOPMENT ✦ CLOUD DEPLOYMENT ✦ REACT ✦ NODE.JS ✦ SPRING BOOT"
+                      delay={20}
                       animateBy="words"
                       direction="bottom"
-                      className="max-w-lg leading-relaxed text-[#d1d5db] font-sans font-medium"
+                      className="whitespace-nowrap inline-block"
                     />
                   </div>
                 )}
               </div>
 
-              {/* PHASE 4: CTA Buttons */}
-              <div ref={ctaRef} className="absolute inset-0 flex flex-col justify-center pointer-events-none opacity-0">
-                <div className="flex flex-wrap items-center gap-6">
-                  <FadeUp playKey={animKeys.phase4} delay={0}>
-                    <a
-                      href="#projects"
-                      className="group relative inline-flex items-center justify-center px-8 py-4 text-sm font-bold text-white bg-[#0d0f12] rounded-md overflow-hidden transition-transform hover:-translate-y-0.5"
-                      style={{ fontFamily: 'var(--font-mono, monospace)' }}
-                    >
-                      <span className="relative z-10 group-hover:text-white transition-colors duration-300">View My Work</span>
-                      <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-[var(--color-accent)] transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
-                    </a>
-                  </FadeUp>
-                  <FadeUp playKey={animKeys.phase4} delay={100}>
-                    <a
-                      href="#connect"
-                      className="group relative inline-flex items-center justify-center px-6 py-4 text-sm font-bold text-[#ffffff] bg-transparent transition-all"
-                      style={{ fontFamily: 'var(--font-mono, monospace)' }}
-                    >
-                      Get in Touch
-                      <div className="absolute bottom-2 left-6 right-6 h-[2px] bg-[#ffffff] opacity-30 group-hover:bg-[var(--color-accent)] group-hover:opacity-100 transition-all duration-300" />
-                    </a>
-                  </FadeUp>
-                </div>
-              </div>
-
-              {/* ════════════════════════════════════════════════════════════ */}
-              {/* ABOUT PHASES (30.1–100% of scroll ≈ 9.9–33s of video)      */}
-              {/* ════════════════════════════════════════════════════════════ */}
-
-              {/* PHASE 6: WHO I AM */}
-              <div ref={whoRef} className="absolute inset-0 flex flex-col justify-center pointer-events-none opacity-0">
-                <p
-                  className="text-[12px] uppercase tracking-[0.3em] font-bold text-[var(--color-accent)] mb-3"
-                  style={{ fontFamily: 'var(--font-mono, monospace)', textShadow: '0 2px 12px rgba(0,0,0,0.8)' }}
-                >
-                  WHO I AM
-                </p>
-                <div
-                  className="leading-[1.1] tracking-tight"
-                  style={{
-                    fontFamily: 'Technor, sans-serif',
-                    fontSize: 'clamp(32px, 5vw, 56px)',
-                    color: '#ffffff',
-                    fontWeight: 700,
-                    textShadow: '0 4px 24px rgba(0,0,0,0.6)'
-                  }}
-                >
-                  {animKeys.phase6 > 0 && (
+              {/* BEAT B: Direct Gaze */}
+              <div ref={beatBRef} className="absolute inset-0 flex flex-col justify-center pointer-events-none opacity-0" style={{ fontFamily: 'Technor, sans-serif' }}>
+                {animKeys.phase5 > 0 && (
+                  <div className="leading-[1.05] tracking-tighter text-white font-[800] text-[clamp(40px,6vw,72px)] mb-6" style={{ textShadow: '0 4px 24px rgba(0,0,0,0.6)' }}>
                     <SplitText
+                      key={`p5-${animKeys.phase5}`}
+                      text="I don't clone tutorials. I architect production stacks."
+                      delay={30}
+                      duration={1.0}
+                      ease="power3.out"
+                      splitType="chars"
+                      from={{ opacity: 0, y: 30 }}
+                      to={{ opacity: 1, y: 0 }}
+                    />
+                  </div>
+                )}
+
+                {animKeys.phase6 > 0 && (
+                  <div className="max-w-xl leading-relaxed text-[#d1d5db] font-bold text-[clamp(16px,1.8vw,20px)] mb-8">
+                    <TextGenerateEffect
                       key={`p6-${animKeys.phase6}`}
-                      text="I am a Full-Stack Developer."
-                      delay={30}
-                      duration={1.0}
-                      ease="power3.out"
-                      splitType="words"
-                      from={{ opacity: 0, y: 20 }}
-                      to={{ opacity: 1, y: 0 }}
+                      words="Currently running production systems at two companies at once — React to Spring Boot, I build the whole thing."
+                      duration={0.8}
                     />
-                  )}
-                </div>
+                  </div>
+                )}
+
+                {animKeys.phase7 > 0 && (
+                  <div className="flex flex-col gap-4 max-w-2xl">
+                    <FadeUp playKey={animKeys.phase7} delay={0}>
+                      <div className="flex flex-col">
+                        <span className="text-3xl sm:text-4xl font-black tracking-tighter text-[#e0303d]" style={{ fontFamily: 'Technor, sans-serif' }}>
+                          <CountUp to={10} className="inline-block" />+ Projects Shipped
+                        </span>
+                        <span className="text-xs sm:text-sm font-bold tracking-widest text-white/50 uppercase mt-1" style={{ fontFamily: 'var(--font-mono, monospace)' }}>All documented on GitHub</span>
+                      </div>
+                    </FadeUp>
+                    <FadeUp playKey={animKeys.phase7} delay={100}>
+                      <div className="flex flex-col">
+                        <span className="text-3xl sm:text-4xl font-black tracking-tighter text-[#e0303d]" style={{ fontFamily: 'Technor, sans-serif' }}>
+                          <CountUp to={8} className="inline-block" />.07 CGPA
+                        </span>
+                        <span className="text-xs sm:text-sm font-bold tracking-widest text-white/50 uppercase mt-1" style={{ fontFamily: 'var(--font-mono, monospace)' }}>B.Tech CSE, GGSIPU Delhi</span>
+                      </div>
+                    </FadeUp>
+                    <FadeUp playKey={animKeys.phase7} delay={200}>
+                      <div className="flex flex-col">
+                        <span className="text-3xl sm:text-4xl font-black tracking-tighter text-[#e0303d]" style={{ fontFamily: 'Technor, sans-serif' }}>
+                          <CountUp to={2} className="inline-block" /> Live Internships
+                        </span>
+                        <span className="text-xs sm:text-sm font-bold tracking-widest text-white/50 uppercase mt-1" style={{ fontFamily: 'var(--font-mono, monospace)' }}>OM Associates · Suvidha Mahila Mandal</span>
+                      </div>
+                    </FadeUp>
+                    <FadeUp playKey={animKeys.phase7} delay={300}>
+                      <div className="flex flex-col">
+                        <span className="text-3xl sm:text-4xl font-black tracking-tighter text-[#e0303d]" style={{ fontFamily: 'Technor, sans-serif' }}>
+                          Class of <CountUp to={2028} className="inline-block" />
+                        </span>
+                        <span className="text-xs sm:text-sm font-bold tracking-widest text-white/50 uppercase mt-1" style={{ fontFamily: 'var(--font-mono, monospace)' }}>Expected Graduation</span>
+                      </div>
+                    </FadeUp>
+                  </div>
+                )}
               </div>
 
-              {/* PHASE 7: CURRENT WORK */}
-              <div ref={workRef} className="absolute inset-0 flex flex-col justify-center pointer-events-none opacity-0">
-                <p
-                  className="text-[12px] uppercase tracking-[0.3em] font-bold text-[var(--color-accent)] mb-3"
-                  style={{ fontFamily: 'var(--font-mono, monospace)', textShadow: '0 2px 12px rgba(0,0,0,0.8)' }}
-                >
-                  CURRENT WORK
-                </p>
-                <div
-                  className="leading-[1.15] tracking-tight"
-                  style={{
-                    fontFamily: 'Technor, sans-serif',
-                    fontSize: 'clamp(28px, 4.5vw, 48px)',
-                    color: '#ffffff',
-                    fontWeight: 700,
-                    textShadow: '0 4px 24px rgba(0,0,0,0.6)'
-                  }}
-                >
-                  {animKeys.phase7 > 0 && (
-                    <SplitText
-                      key={`p7-${animKeys.phase7}`}
-                      text="Interning simultaneously at OM Associates & Suvidha Mahila Mandal."
-                      delay={30}
-                      duration={1.0}
-                      ease="power3.out"
-                      splitType="words"
-                      from={{ opacity: 0, y: 20 }}
-                      to={{ opacity: 1, y: 0 }}
-                    />
-                  )}
-                </div>
-              </div>
-
-              {/* PHASE 8: PHILOSOPHY */}
-              <div ref={philRef} className="absolute inset-0 flex flex-col justify-center pointer-events-none opacity-0">
-                <p
-                  className="text-[12px] uppercase tracking-[0.3em] font-bold text-[var(--color-accent)] mb-3"
-                  style={{ fontFamily: 'var(--font-mono, monospace)', textShadow: '0 2px 12px rgba(0,0,0,0.8)' }}
-                >
-                  PHILOSOPHY
-                </p>
-                <div
-                  className="leading-[1.1] tracking-tight"
-                  style={{
-                    fontFamily: 'Technor, sans-serif',
-                    fontSize: 'clamp(32px, 5vw, 56px)',
-                    color: '#ffffff',
-                    fontWeight: 700,
-                    textShadow: '0 4px 24px rgba(0,0,0,0.6)'
-                  }}
-                >
-                  {animKeys.phase8 > 0 && (
-                    <SplitText
+              {/* BEAT C: Current Work / Tie-Adjust */}
+              <div ref={beatCRef} className="absolute inset-0 flex flex-col justify-center pointer-events-none opacity-0" style={{ fontFamily: 'Technor, sans-serif' }}>
+                {animKeys.phase8 > 0 && (
+                  <div className="mb-4">
+                    <EncryptedText
                       key={`p8-${animKeys.phase8}`}
-                      text="Full-stack systems, built to actually ship."
-                      delay={30}
-                      duration={1.0}
-                      ease="power3.out"
-                      splitType="words"
-                      from={{ opacity: 0, y: 20 }}
-                      to={{ opacity: 1, y: 0 }}
+                      text="CURRENT WORK"
+                      className="tracking-[0.2em] text-[10px] sm:text-xs font-bold uppercase"
+                      encryptedClassName="text-[#e0303d]/60"
+                      revealedClassName="text-[#e0303d]"
                     />
-                  )}
-                </div>
-              </div>
+                  </div>
+                )}
 
-              {/* PHASE 9: CLOSING / TRANSITION */}
-              <div ref={closeRef} className="absolute inset-0 flex flex-col justify-center pointer-events-none opacity-0">
-                <div
-                  className="leading-[1.1] tracking-tight"
-                  style={{
-                    fontFamily: 'Technor, sans-serif',
-                    fontSize: 'clamp(32px, 5vw, 56px)',
-                    color: '#ffffff',
-                    fontWeight: 700,
-                    textShadow: '0 4px 24px rgba(0,0,0,0.6)'
-                  }}
-                >
-                  {animKeys.phase9 > 0 && (
+                {animKeys.phase9 > 0 && (
+                  <div className="leading-[1.05] tracking-tighter text-white font-[800] text-[clamp(32px,5vw,64px)] mb-6" style={{ textShadow: '0 4px 24px rgba(0,0,0,0.6)' }}>
                     <SplitText
                       key={`p9-${animKeys.phase9}`}
-                      text="Here's what that looks like in practice."
-                      delay={30}
+                      text="Two simultaneous full-stack internships. Two live AI platforms. One engineer."
+                      delay={20}
                       duration={1.0}
                       ease="power3.out"
                       splitType="words"
                       from={{ opacity: 0, y: 20 }}
                       to={{ opacity: 1, y: 0 }}
                     />
-                  )}
-                </div>
-                <div className="w-16 h-px bg-white/40 mt-6" />
+                  </div>
+                )}
+
+                {animKeys.phase10 > 0 && (
+                  <div className="max-w-xl leading-relaxed text-[#d1d5db] font-bold text-[clamp(15px,1.6vw,18px)]">
+                    <TextGenerateEffect
+                      key={`p10-${animKeys.phase10}`}
+                      words="Building the client site + AI advisory chatbot for OM Associates, a tax and legal consultancy. Simultaneously developing ResearchConnect — a 4-module AI research collaboration platform — at Suvidha Mahila Mandal."
+                      duration={0.8}
+                    />
+                  </div>
+                )}
               </div>
 
-            </div>
-          </div>
+              {/* BEAT D: Philosophy / Sunglasses / Close */}
+              <div ref={beatDRef} className="absolute inset-0 flex flex-col justify-center pointer-events-none opacity-0" style={{ fontFamily: 'Technor, sans-serif' }}>
+                {animKeys.phase11 > 0 && (
+                  <div className="mb-4">
+                    <EncryptedText
+                      key={`p11-${animKeys.phase11}`}
+                      text="PHILOSOPHY"
+                      className="tracking-[0.2em] text-[10px] sm:text-xs font-bold uppercase"
+                      encryptedClassName="text-[#e0303d]/60"
+                      revealedClassName="text-[#e0303d]"
+                    />
+                  </div>
+                )}
 
-          {/* Phase 5 HUD Cards: Redistributed left and right, moved higher up to avoid torso overlap */}
-          <div ref={hudRef} className="absolute top-1/2 -translate-y-1/2 left-6 right-6 sm:left-12 sm:right-12 z-20 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-8 pointer-events-none">
+                {animKeys.phase12 > 0 && (
+                  <div className="leading-[1.05] tracking-tighter text-white font-[800] text-[clamp(40px,6vw,72px)] mb-6" style={{ textShadow: '0 4px 24px rgba(0,0,0,0.6)' }}>
+                    <SplitText
+                      key={`p12-${animKeys.phase12}`}
+                      text="I don't abandon repositories. I ship them to production."
+                      delay={30}
+                      duration={1.0}
+                      ease="power3.out"
+                      splitType="words"
+                      from={{ opacity: 0, y: 30 }}
+                      to={{ opacity: 1, y: 0 }}
+                    />
+                  </div>
+                )}
 
-            {/* Left Stats Column */}
-            <div className="flex flex-col items-start gap-4">
-              <FadeUp playKey={animKeys.phase5} delay={0}>
-                <HeroStatText
-                  value="10+ Projects Shipped"
-                  label="All documented on GitHub"
-                  className="justify-start"
-                  accentColor="var(--color-accent)"
-                />
-              </FadeUp>
-              <FadeUp playKey={animKeys.phase5} delay={40}>
-                <HeroStatText
-                  value="8.07 CGPA"
-                  label="B.Tech CSE, GGSIPU Delhi"
-                  className="justify-start"
-                  accentColor="var(--color-accent)"
-                />
-              </FadeUp>
-            </div>
+                {animKeys.phase13 > 0 && (
+                  <>
+                    <div className="leading-relaxed text-white font-bold text-[clamp(18px,2vw,24px)] mb-8">
+                      <SplitText
+                        key={`p13-${animKeys.phase13}`}
+                        text="Enough talk. Inspect the architecture."
+                        delay={30}
+                        duration={0.7}
+                        ease="power3.out"
+                        splitType="words"
+                        from={{ opacity: 0, y: 15 }}
+                        to={{ opacity: 1, y: 0 }}
+                      />
+                    </div>
 
-            {/* Right Stats Column */}
-            <div className="flex flex-col items-start sm:items-end gap-5">
-              <FadeUp playKey={animKeys.phase5} delay={80}>
-                <HeroStatText
-                  value="Class of '28 · B.Tech CSE"
-                  label="Expected Graduation"
-                  className="justify-start sm:justify-end"
-                  accentColor="var(--color-accent)"
-                />
-              </FadeUp>
-              <FadeUp playKey={animKeys.phase5} delay={160}>
-                <HeroStatText
-                  value="2 Live Internships"
-                  label="OM Associates • Suvidha Mahila Mandal"
-                  className="justify-start sm:justify-end"
-                  accentColor="var(--color-accent)"
-                />
-              </FadeUp>
+                    <div className="flex flex-wrap items-center gap-6 pointer-events-auto">
+                      <FadeUp playKey={animKeys.phase13} delay={0}>
+                        <a
+                          href="#projects"
+                          onClick={(e) => handleScrollTo(e, '#projects')}
+                          className="group relative inline-flex items-center justify-center px-8 py-4 text-sm font-bold text-white bg-[#0d0f12] rounded-md overflow-hidden transition-transform hover:-translate-y-0.5"
+                          style={{ fontFamily: 'var(--font-mono, monospace)' }}
+                        >
+                          <span className="relative z-10 group-hover:text-white transition-colors duration-300">View My Work</span>
+                          <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-[#e0303d] transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
+                        </a>
+                      </FadeUp>
+                      <FadeUp playKey={animKeys.phase13} delay={100}>
+                        <a
+                          href="#connect"
+                          onClick={(e) => handleScrollTo(e, '#connect')}
+                          className="group relative inline-flex items-center justify-center px-6 py-4 text-sm font-bold text-white bg-transparent transition-all"
+                          style={{ fontFamily: 'var(--font-mono, monospace)' }}
+                        >
+                          Get in Touch
+                          <div className="absolute bottom-2 left-6 right-6 h-[2px] bg-white opacity-30 group-hover:bg-[#e0303d] group-hover:opacity-100 transition-all duration-300" />
+                        </a>
+                      </FadeUp>
+                    </div>
+                  </>
+                )}
+              </div>
             </div>
           </div>
 

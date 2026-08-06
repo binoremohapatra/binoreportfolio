@@ -17,6 +17,7 @@
   --font-display: var(--font-display);
 
   --animate-border-beam: border-beam calc(var(--duration)*1s) infinite linear;
+  --animate-shiny-text: shiny-text 3s linear infinite;
 
   /* Tailwind color tokens */
   --color-crimson: var(--color-accent);
@@ -28,6 +29,15 @@
 @keyframes border-beam {
   100% {
     offset-distance: 100%;
+  }
+}
+
+@keyframes shiny-text {
+  0%, 10%, 100% {
+    background-position: -200% 0;
+  }
+  70%, 90% {
+    background-position: 200% 0;
   }
 }
 
