@@ -83,7 +83,7 @@
 }
 
 .logoloop__item:hover svg {
-  color: #d97757;
+  color: #e0303d;
 }
 
 .logoloop__item span {
@@ -99,7 +99,7 @@
 
 .logoloop__item:hover span {
   opacity: 1;
-  color: #d97757;
+  color: #e0303d;
 }
 
 /* Reduced motion */

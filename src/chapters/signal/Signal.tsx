@@ -225,7 +225,7 @@ export function Signal() {
                   x={`${xPercent}%`}
                   y="78%"
                   fontSize="clamp(72px, 15vw, 180px)"
-                  fontFamily="var(--font-sans, Inter, sans-serif)"
+                  fontFamily="'Technor', sans-serif"
                   fontWeight={i === WEIGHT_SEAM_INDEX ? "300" : "300"}
                   letterSpacing="-0.02em"
                   fill="white"
@@ -246,7 +246,7 @@ export function Signal() {
               x={`${(WEIGHT_SEAM_INDEX / NAME_CHARS.length) * 100}%`}
               y="78%"
               fontSize="clamp(72px, 15vw, 180px)"
-              fontFamily="var(--font-sans, Inter, sans-serif)"
+              fontFamily="'Technor', sans-serif"
               fontWeight="800"
               letterSpacing="-0.02em"
               fill="white"

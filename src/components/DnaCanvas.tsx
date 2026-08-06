@@ -9,16 +9,26 @@ function DnaGltfModel({ url }: { url: string }) {
   const { scene } = useGLTF(url);
   const { viewport } = useThree();
   const modelRef = useRef<THREE.Group>(null);
+  const scrollRotRef = useRef(0);
+
+  useEffect(() => {
+    const handleScroll = (e: Event) => {
+      // The cards rotate by negative angle as we scroll down.
+      scrollRotRef.current = ((e as CustomEvent).detail * Math.PI) / 180;
+    };
+    window.addEventListener('dnaRotate', handleScroll);
+    return () => window.removeEventListener('dnaRotate', handleScroll);
+  }, []);
 
   // Clone scene so we can mutate materials safely
   const clonedScene = useMemo(() => {
     const clone = scene.clone();
     
-    // Strand A: Metallic reflective orange
+    // Strand A: Metallic reflective dark crimson
     const orangeMetallicMaterial = new THREE.MeshStandardMaterial({
-      color: '#d97757',
-      emissive: '#d97757',
-      emissiveIntensity: 0.1,
+      color: '#7a0a0a',
+      emissive: '#4a0f0f',
+      emissiveIntensity: 0.2,
       metalness: 0.85,
       roughness: 0.25,
     });
@@ -95,10 +105,13 @@ function DnaGltfModel({ url }: { url: string }) {
   }, [clonedScene, centerOffset]);
 
   useFrame((_state, delta) => {
-    // 3. Respect prefers-reduced-motion
-    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (modelRef.current && !prefersReducedMotion) {
-      modelRef.current.rotation.y += delta * 0.3; // Slow, ambient rotation
+    if (modelRef.current) {
+      // Smoothly interpolate current rotation to the target scroll rotation
+      modelRef.current.rotation.y = THREE.MathUtils.lerp(
+        modelRef.current.rotation.y,
+        scrollRotRef.current,
+        10 * delta
+      );
     }
   });
 
@@ -148,7 +161,7 @@ export default function DnaCanvas({ fallbackSvg }: { fallbackSvg: ReactNode }) {
           <ambientLight intensity={0.5} />
           {/* Rim light to make the metallic strand pop */}
           <directionalLight position={[10, 10, -5]} intensity={2} color="#ffffff" />
-          <directionalLight position={[-10, 10, 10]} intensity={1} color="#d97757" />
+          <directionalLight position={[-10, 10, 10]} intensity={1} color="#e0303d" />
           {/* Suspense boundary hides loading spinner, keeps layout stable, and pops in smoothly */}
           <Suspense fallback={null}>
             {/* Environment preset provides reflections for the metalness to catch */}

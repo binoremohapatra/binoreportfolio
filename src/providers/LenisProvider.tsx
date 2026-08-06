@@ -34,9 +34,10 @@ export function LenisProvider({ children }: { children: ReactNode }) {
     gsap.registerPlugin(ScrollTrigger);
 
     const lenis = new Lenis({
-      lerp: 0.1,
-      duration: 1.4,
-      // easeCine: slow in, slow out, cinematic weight
+      lerp: 0.05, // Lower lerp makes it much smoother and "floaty"
+      duration: 1.5,
+      wheelMultiplier: 0.8, // Slightly slower scroll feels more premium
+      smoothWheel: true,
       easing: (t: number) => (t === 1 ? 1 : 1 - Math.pow(2, -10 * t)),
     });
 

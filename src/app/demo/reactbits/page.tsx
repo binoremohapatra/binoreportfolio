@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import dynamic from "next/dynamic";
 
@@ -99,7 +99,7 @@ export default function ReactBitsDemo() {
               weight={true}
               italic={true}
               textColor="#2dd4bf"
-              strokeColor="#d97757"
+              strokeColor="#e0303d"
               minFontSize={32}
             />
           </div>
@@ -158,8 +158,8 @@ export default function ReactBitsDemo() {
                 fontSize: "clamp(28px, 5vw, 52px)",
                 fontWeight: 800,
                 letterSpacing: "-0.02em",
-                color: "#d97757",
-                fontFamily: "var(--font-mono, monospace)",
+                color: "#e0303d",
+                fontFamily: "Technor, sans-serif",
               }}
             />
           </div>

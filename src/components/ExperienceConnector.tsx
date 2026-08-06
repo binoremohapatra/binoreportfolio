@@ -143,6 +143,13 @@ export default function ExperienceConnector() {
 
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
   const { isReducedMotionActive } = useReducedMotion();
+  const [cardVariant, setCardVariant] = useState('option2');
+
+  useEffect(() => {
+    const handleVariantChange = (e: Event) => setCardVariant((e as CustomEvent).detail);
+    window.addEventListener('cardVariantChange', handleVariantChange);
+    return () => window.removeEventListener('cardVariantChange', handleVariantChange);
+  }, []);
 
   const setNodeOrbRef = useCallback((el: HTMLDivElement | null, i: number) => {
     nodeOrbRefs.current[i] = el;
@@ -306,13 +313,13 @@ export default function ExperienceConnector() {
             // Text envelope — flat/2D, no 3D applied, entrance/exit triggered via GSAP timelines
             if (textBlock) {
               const isActive = progress >= range.enterStart && (range.exitStart === null || progress < range.exitStart);
-              
+
               if (isActive !== nodeActiveStateRef.current[i]) {
                 nodeActiveStateRef.current[i] = isActive;
-                
+
                 if (isActive) {
                   // Entrance animation - now swings in with rotateY for depth
-                  gsap.fromTo(textBlock, 
+                  gsap.fromTo(textBlock,
                     { opacity: 0, scale: 0.96, y: 12, rotateY: -8 },
                     { opacity: 1, scale: 1, y: 0, rotateY: 0, duration: 0.6, ease: 'power3.out', overwrite: 'auto' }
                   );
@@ -353,14 +360,14 @@ export default function ExperienceConnector() {
   return (
     <section
       ref={sectionRef}
-      className="relative w-full overflow-hidden bg-[#a8adac]"
+      className="relative w-full overflow-hidden bg-[var(--bg-primary)]"
       style={{ height: `${SECTION_HEIGHT_VH}vh` }}
       aria-label="Experience timeline"
     >
       <style>{`
         @keyframes panelBreathe {
-          0%, 100% { box-shadow: 0 0 15px rgba(217, 119, 87, 0.15); }
-          50% { box-shadow: 0 0 25px rgba(217, 119, 87, 0.3); }
+          0%, 100% { box-shadow: 0 0 15px color-mix(in srgb, var(--color-accent) 15%, transparent); }
+          50% { box-shadow: 0 0 25px color-mix(in srgb, var(--color-accent) 30%, transparent); }
         }
         .panel-breathe {
           animation: panelBreathe 4s ease-in-out infinite;
@@ -368,7 +375,7 @@ export default function ExperienceConnector() {
         @media (prefers-reduced-motion: reduce) {
           .panel-breathe {
             animation: none;
-            box-shadow: 0 0 15px rgba(217, 119, 87, 0.2);
+            box-shadow: 0 0 15px color-mix(in srgb, var(--color-accent) 20%, transparent);
           }
         }
       `}</style>
@@ -377,12 +384,12 @@ export default function ExperienceConnector() {
       {/* ── Section label — flat, above 3D layer ── */}
       <div className="relative z-20 pt-24 pb-8 text-center pointer-events-none">
         <h2
-          className="text-3xl font-bold tracking-[0.2em] uppercase text-[#181a1b]"
-          style={{ fontFamily: 'var(--font-mono, monospace)' }}
+          className="text-3xl font-bold tracking-[0.2em] uppercase"
+          style={{ fontFamily: 'Technor, sans-serif', color: 'var(--text-primary)' }}
         >
           Experience
         </h2>
-        <div className="w-24 h-1 bg-[#d97757] mx-auto mt-6 rounded-full" />
+        <div className="w-24 h-1 bg-[var(--color-accent)] mx-auto mt-6 rounded-full" />
       </div>
 
       {/*
@@ -432,9 +439,9 @@ export default function ExperienceConnector() {
               <path
                 d={pathD}
                 fill="none"
-                stroke="#d97757"
+                stroke="var(--color-accent)"
                 strokeWidth="1.5"
-                opacity="0.08"
+                opacity="0.2"
                 strokeLinecap="round"
                 strokeDasharray="6 8"
               />
@@ -444,7 +451,7 @@ export default function ExperienceConnector() {
                 ref={pathRef}
                 d={pathD}
                 fill="none"
-                stroke="#d97757"
+                stroke="var(--color-accent)"
                 strokeWidth="2.5"
                 strokeLinecap="round"
                 filter="url(#lineGlow)"
@@ -484,17 +491,17 @@ export default function ExperienceConnector() {
                 <div
                   className="absolute inset-[-100%] rounded-full"
                   style={{
-                    background: 'radial-gradient(circle, rgba(217,119,87,var(--glow-opacity,0.2)) 0%, transparent 70%)',
+                    background: 'radial-gradient(circle, color-mix(in srgb, var(--color-accent) var(--glow-opacity, 20%), transparent) 0%, transparent 70%)',
                     filter: 'blur(var(--glow-blur, 4px))',
                     pointerEvents: 'none',
                   }}
                 />
                 {/* Core dot */}
                 <div
-                  className="absolute inset-0 rounded-full border border-[#d97757]"
+                  className="absolute inset-0 rounded-full border border-white/20"
                   style={{
-                    background: 'radial-gradient(circle at 35% 35%, #f0a080, #d97757 60%, #b85c3a)',
-                    boxShadow: '0 0 8px rgba(217,119,87,0.5), inset 0 1px 0 rgba(255,255,255,0.3)',
+                    background: 'radial-gradient(circle at 35% 35%, color-mix(in srgb, var(--color-accent) 80%, white), var(--color-accent) 60%, color-mix(in srgb, var(--color-accent) 60%, black))',
+                    boxShadow: '0 0 8px color-mix(in srgb, var(--color-accent) 50%, transparent), inset 0 1px 0 rgba(255,255,255,0.3)',
                     borderRadius: '50%',
                   }}
                 />
@@ -526,13 +533,14 @@ export default function ExperienceConnector() {
         but NOT wrapped in any preserve-3d context. Pure 2D screen space.
       */}
       {nodePositions.map((pos, i) => (
-        <ExperienceCard 
+        <ExperienceCard
           key={EXPERIENCE_NODES[i].id}
           node={EXPERIENCE_NODES[i]}
           pos={pos}
           index={i}
           isMobile={isMobile}
           setTextBlockRef={setTextBlockRef}
+          cardVariant={cardVariant}
         />
       ))}
 
@@ -541,7 +549,7 @@ export default function ExperienceConnector() {
 }
 
 // ─── Subcomponent: Experience Card (Handles Tilt & Parallax) ───────────────
-function ExperienceCard({ node, pos, index, isMobile, setTextBlockRef }: any) {
+function ExperienceCard({ node, pos, index, isMobile, setTextBlockRef, cardVariant }: any) {
   const isLeft = node.side === 'left';
   const cardRef = useRef<HTMLDivElement>(null);
   const sheenRef = useRef<HTMLDivElement>(null);
@@ -550,41 +558,41 @@ function ExperienceCard({ node, pos, index, isMobile, setTextBlockRef }: any) {
 
   const textStyle: React.CSSProperties = isMobile
     ? {
-        position: 'absolute',
-        top: pos.y + 20,
-        left: '8%',
-        right: '8%',
-        textAlign: 'center',
-      }
+      position: 'absolute',
+      top: pos.y + 20,
+      left: '8%',
+      right: '8%',
+      textAlign: 'center',
+    }
     : {
-        position: 'absolute',
-        top: pos.y - 60,
-        ...(isLeft
-          ? { right: '54%', paddingRight: 48, textAlign: 'right' as const }
-          : { left: '54%', paddingLeft: 48, textAlign: 'left' as const }),
-        maxWidth: '40%', // slightly wider for glassmorphic padding
-        perspective: '1000px', // needed for child 3D tilt
-      };
+      position: 'absolute',
+      top: pos.y - 60,
+      ...(isLeft
+        ? { right: '54%', paddingRight: 48, textAlign: 'right' as const }
+        : { left: '54%', paddingLeft: 48, textAlign: 'left' as const }),
+      maxWidth: '40%', // slightly wider for glassmorphic padding
+      perspective: '1000px', // needed for child 3D tilt
+    };
 
   const handleMouseMove = (e: React.MouseEvent) => {
     if (isMobile || tier === 'low' || !cardRef.current) return;
     const rect = cardRef.current.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
-    
+
     const xNorm = (x / rect.width) * 2 - 1;
     const yNorm = (y / rect.height) * 2 - 1;
-    
+
     const tiltX = xNorm * 8;
     const tiltY = yNorm * 8;
-    
+
     // Direct DOM mutation avoids React setState jank (60fps)
     cardRef.current.style.transform = `rotateX(${-tiltY}deg) rotateY(${tiltX}deg)`;
-    
+
     if (backingRef.current) {
       backingRef.current.style.transform = `translate(${8 - tiltX * 0.25}px, ${8 - tiltY * 0.25}px)`;
     }
-    
+
     if (sheenRef.current) {
       sheenRef.current.style.background = `radial-gradient(circle at ${50 - tiltX * 3.75}% ${50 - tiltY * 3.75}%, rgba(255,255,255,0.5) 0%, transparent 60%)`;
     }
@@ -608,7 +616,7 @@ function ExperienceCard({ node, pos, index, isMobile, setTextBlockRef }: any) {
       style={{ ...textStyle, opacity: 0 }}
     >
       {/* Inner wrapper bound to card size */}
-      <div 
+      <div
         ref={cardRef}
         className="relative w-full h-full"
         onMouseMove={handleMouseMove}
@@ -620,7 +628,7 @@ function ExperienceCard({ node, pos, index, isMobile, setTextBlockRef }: any) {
         }}
       >
         {/* 1. SOLID BACKING LAYER (The literal thickness) */}
-        <div 
+        <div
           ref={backingRef}
           className="absolute inset-0 rounded-md bg-[#0d0f12] pointer-events-none shadow-[-20px_20px_40px_rgba(0,0,0,0.4)]"
           style={{
@@ -630,81 +638,91 @@ function ExperienceCard({ node, pos, index, isMobile, setTextBlockRef }: any) {
         />
 
         {/* Connector dot - embedded in the top-left/right gap */}
-        <div 
-          className={`absolute -top-1 w-2 h-2 rounded-full bg-[#d97757] shadow-[0_0_10px_rgba(217,119,87,0.8)] ${
-            isMobile ? 'hidden' : isLeft ? '-right-1 translate-x-1/2' : '-left-1 -translate-x-1/2'
-          } z-20 transition-opacity duration-300`}
+        <div
+          className={`absolute -top-1 w-2 h-2 rounded-full bg-[var(--color-accent)] shadow-[0_0_10px_var(--color-accent)] ${isMobile ? 'hidden' : isLeft ? '-right-1 translate-x-1/2' : '-left-1 -translate-x-1/2'
+            } z-20 transition-opacity duration-300`}
         />
 
-        {/* 3. FRONT GLASS PANEL */}
-        <div 
-          className="relative w-full h-full p-8 sm:p-10 rounded-md backdrop-blur-md border-2 border-[#d97757]/40 text-left overflow-hidden z-10"
-          style={{
-            backgroundColor: 'rgba(168, 173, 172, 0.15)', // Light grey base (#a8adac)
-            // No text-shadow for dark text on light bg
-            // Top-edge glass refraction highlight
-            boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.15), inset 0 0 0 1px rgba(255,255,255,0.05)',
-          }}
-        >
-          {/* Inner glass refraction border */}
-          <div className="absolute inset-0 border border-white/10 rounded-md pointer-events-none" />
-
-          {/* Dynamic glass sheen overlay — more visible now that bg is light */}
-          {!isMobile && (
-            <div 
-              ref={sheenRef}
-              className="absolute inset-0 pointer-events-none opacity-30"
-              style={{
-                background: `radial-gradient(circle at 50% 50%, rgba(255,255,255,0.5) 0%, transparent 60%)`,
-                transition: 'background 0.1s ease-out',
-              }}
-            />
-          )}
-
-          {/* Content */}
-          <div className="relative z-20">
-            {/* Category pill */}
-            <div
-              className="inline-block text-[10px] uppercase tracking-[0.28em] font-bold mb-3 px-3 py-1 bg-[#d97757]/15 rounded-full border border-[#d97757]/20"
-              style={{ fontFamily: 'var(--font-mono, monospace)', color: '#d97757' }}
-            >
-              {node.category}
-            </div>
-
-            {/* Title */}
-            <h3
-              className="text-xl sm:text-2xl font-bold tracking-tight mb-3 leading-tight text-white"
-              style={{ fontFamily: 'var(--font-mono, monospace)' }}
-            >
-              {node.title}
-            </h3>
-
-            {/* Divider line */}
-            <div
-              className="mb-4"
-              style={{ height: '1px', background: 'linear-gradient(to right, rgba(217,119,87,0.8), transparent)', width: '100%' }}
-            />
-
-            {/* Description */}
-            <p
-              className="text-[14px] leading-relaxed mb-6 text-white/90"
-              style={{ fontFamily: 'var(--font-mono, monospace)' }}
-            >
-              {node.description}
-            </p>
-
-            {/* Tech tags */}
-            {node.tech && (
-              <div className="text-[12px] uppercase tracking-wider font-semibold flex flex-wrap gap-2" style={{ fontFamily: 'var(--font-mono, monospace)' }}>
-                {node.tech.split('·').map((tag: string) => (
-                  <span key={tag} className="text-[#d97757]/80 hover:text-[#d97757] hover:scale-105 transition-all duration-200 cursor-default inline-block">
-                    {tag.trim()}
-                  </span>
-                ))}
+        {/* ── CARD VARIANTS ── */}
+        {cardVariant === 'option1' && (
+          <div className="relative w-full h-full p-8 sm:p-10 rounded-md border border-[var(--color-accent)] bg-transparent text-left overflow-hidden z-10 transition-colors duration-300 hover:bg-[var(--color-accent)]/5 shadow-none hover:shadow-[0_0_15px_color-mix(in_srgb,var(--color-accent)_40%,transparent)]">
+            <div className="relative z-20">
+              <div className="inline-block text-[10px] uppercase tracking-[0.28em] font-bold mb-3 px-3 py-1 bg-transparent border border-[var(--color-accent)] rounded-full text-[var(--color-accent)] font-mono">
+                {node.category}
               </div>
-            )}
+              <h3 className="text-xl sm:text-2xl font-bold tracking-tight mb-3 leading-tight text-[var(--text-primary)] font-mono">
+                {node.title}
+              </h3>
+              <div className="mb-4 h-px w-full bg-[var(--color-accent)]/40" />
+              <p className="text-[14px] leading-relaxed mb-6 text-[var(--text-primary)]/80 font-mono">
+                {node.description}
+              </p>
+              {node.tech && (
+                <div className="text-[12px] uppercase tracking-wider font-semibold flex flex-wrap gap-2 font-mono">
+                  {node.tech.split('·').map((tag: string) => (
+                    <span key={tag} className="text-[var(--color-accent)] hover:scale-105 transition-all duration-200 cursor-default inline-block">
+                      {tag.trim()}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
-        </div>
+        )}
+
+        {cardVariant === 'option2' && (
+          <div className="relative w-full h-full p-8 sm:p-10 rounded-2xl bg-[#181a1b] border border-white/10 text-left overflow-hidden z-10 transition-all duration-500 group-hover:border-[var(--color-accent)] group-hover:shadow-[0_0_25px_color-mix(in_srgb,var(--color-accent)_40%,transparent)]">
+            <div className="relative z-20">
+              <div className="inline-block text-[10px] uppercase tracking-[0.28em] font-bold mb-4 px-3 py-1 bg-white text-black rounded-full font-sans">
+                {node.category}
+              </div>
+              <h3 className="text-xl sm:text-2xl font-bold tracking-tight mb-3 leading-tight text-white font-sans">
+                {node.title}
+              </h3>
+              <p className="text-[14px] leading-relaxed mb-6 text-white/80 font-sans">
+                {node.description}
+              </p>
+              {node.tech && (
+                <div className="flex flex-wrap gap-x-3 gap-y-1 text-[10px] font-bold tracking-widest uppercase font-mono text-[var(--color-accent)]">
+                  {node.tech.split('·').map((tag: string) => (
+                    <span key={tag} className="inline-block">
+                      {tag.trim()}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {cardVariant === 'option3' && (
+          <div className="relative w-full h-full rounded-md bg-black border border-white/20 text-left overflow-hidden z-10 flex flex-col">
+            <div className="h-6 bg-white/10 flex items-center px-3 gap-1.5 shrink-0 border-b border-white/10">
+              <div className="w-2.5 h-2.5 rounded-full bg-red-500" />
+              <div className="w-2.5 h-2.5 rounded-full bg-yellow-500" />
+              <div className="w-2.5 h-2.5 rounded-full bg-green-500" />
+              <span className="ml-2 text-[10px] font-mono text-white/50">~/experience/{node.title.toLowerCase().replace(/\s+/g, '-')}</span>
+            </div>
+            <div className="p-6 sm:p-8 relative z-20 flex-1">
+              <p className="text-[10px] uppercase font-bold mb-3 text-[var(--color-accent)] font-mono">&gt; ./run_experience</p>
+              <h3 className="text-xl sm:text-2xl font-bold tracking-tight mb-3 leading-tight text-white font-mono">
+                {node.title}<span className="animate-blink inline-block w-3 h-6 bg-[var(--color-accent)] ml-2 align-middle" />
+              </h3>
+              <p className="text-[14px] leading-relaxed mb-6 text-white/70 font-mono">
+                {node.description}
+              </p>
+              {node.tech && (
+                <div className="text-[12px] uppercase tracking-wider font-semibold flex flex-wrap gap-2 font-mono">
+                  {node.tech.split('·').map((tag: string) => (
+                    <span key={tag} className="text-white/40 inline-block before:content-['#'] before:mr-0.5">
+                      {tag.trim()}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

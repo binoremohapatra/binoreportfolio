@@ -177,6 +177,15 @@ export function QualityProvider({ children }: { children: React.ReactNode }) {
       
       if (isMounted) {
         setQuality(tierToFlags(finalTier));
+        // Give React a tick to render the full sections (which expand from 100vh to 200/300vh),
+        // then refresh GSAP ScrollTrigger so markers are accurate.
+        setTimeout(() => {
+          if (typeof window !== 'undefined') {
+            import('gsap/ScrollTrigger').then((mod) => {
+              mod.ScrollTrigger.refresh();
+            });
+          }
+        }, 100);
       }
     };
     

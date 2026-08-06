@@ -18,6 +18,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning className="dark">
+      <head>
+        <link href="https://api.fontshare.com/v2/css?f[]=technor@400,500,600,700,800&amp;display=swap" rel="stylesheet" />
+      </head>
       <body
         className={cn(
           "min-h-screen bg-background font-sans antialiased",

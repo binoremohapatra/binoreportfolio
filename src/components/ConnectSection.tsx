@@ -28,9 +28,10 @@
 import React, { useRef, useState, useEffect } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { MessageCircle } from 'lucide-react';
+import { MessageCircle, Mail } from 'lucide-react';
 import { EncryptedText } from '@/components/ui/encrypted-text';
 import { useAdaptiveQuality } from '@/hooks/useAdaptiveQuality';
+import { preloadFrames, useScrollVideoScrub } from '@/hooks/useScrollVideoScrub';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -58,6 +59,7 @@ const SOCIAL_LINKS = {
   github: 'https://github.com/binoremohapatra',
   whatsapp: 'https://wa.me/918368027842?text=Hi%2C%20I%20saw%20your%20portfolio!',
   linkedin: 'https://www.linkedin.com/in/binoremohapatra/',
+  email: 'mailto:binoremohapatra@gmail.com',
 };
 
 // ─── Same helpers from Hero ────────────────────────────────────────────────────
@@ -143,7 +145,7 @@ function SocialLink({
       >
         {/* Icon */}
         <span
-          className="text-white/50 transition-colors duration-300 group-hover:text-[#d97757]"
+          className="text-white/50 transition-colors duration-300 group-hover:text-[#e0303d]"
           style={{ filter: 'drop-shadow(0 0 0px transparent)', transition: 'color 0.3s, filter 0.3s' }}
         >
           {/* On hover, icon glows orange — driven by group-hover via CSS */}
@@ -154,7 +156,7 @@ function SocialLink({
 
         {/* Label */}
         <span
-          className="text-[11px] uppercase tracking-[0.25em] font-bold text-white/40 group-hover:text-[#d97757] transition-colors duration-300"
+          className="text-[11px] uppercase tracking-[0.25em] font-bold text-white/40 group-hover:text-[#e0303d] transition-colors duration-300"
           style={{
             fontFamily: 'var(--font-mono, monospace)',
             textShadow: '0 2px 12px rgba(0,0,0,0.8)',
@@ -164,7 +166,7 @@ function SocialLink({
         </span>
 
         {/* Underline hint — orange, scales in on hover */}
-        <div className="hidden sm:block h-px w-0 bg-[#d97757] group-hover:w-full transition-all duration-300 origin-left opacity-60 mt-1 self-end" />
+        <div className="hidden sm:block h-px w-0 bg-[#e0303d] group-hover:w-full transition-all duration-300 origin-left opacity-60 mt-1 self-end" />
       </a>
     </FadeUp>
   );
@@ -190,22 +192,22 @@ function LowTierConnectSection({ SOCIAL_LINKS }: { animKeys: any, setAnimKeys: a
       id="connect"
       ref={sectionRef}
       className="relative w-full min-h-screen flex flex-col items-center justify-center gap-12 px-8 py-24"
-      style={{ background: 'linear-gradient(to bottom, #0d0f12, #111315)' }}
+      style={{ background: 'linear-gradient(to bottom, #131416, #261917)' }}
     >
       {/* Top accent */}
-      <div className="absolute top-0 left-0 right-0 h-[3px]" style={{ background: 'linear-gradient(to right, transparent, #d97757, transparent)' }} />
+      <div className="absolute top-0 left-0 right-0 h-[3px]" style={{ background: 'linear-gradient(to right, transparent, #e0303d, transparent)' }} />
 
       {/* Headline */}
       <div
         className="text-center transition-all duration-700"
         style={{ opacity: visible ? 1 : 0, transform: visible ? 'translateY(0)' : 'translateY(24px)', transitionDelay: '0.1s' }}
       >
-        <p className="text-[10px] uppercase tracking-[0.35em] font-bold text-[#d97757] mb-4" style={{ fontFamily: 'var(--font-mono, monospace)' }}>
+        <p className="text-[10px] uppercase tracking-[0.35em] font-bold text-[#e0303d] mb-4" style={{ fontFamily: 'var(--font-mono, monospace)' }}>
           Let&apos;s Connect
         </p>
         <h2
           className="font-bold text-white"
-          style={{ fontFamily: 'var(--font-mono, monospace)', fontSize: 'clamp(32px, 8vw, 56px)', lineHeight: 1.05, letterSpacing: '-0.02em' }}
+          style={{ fontFamily: 'Technor, sans-serif', fontSize: 'clamp(32px, 8vw, 56px)', lineHeight: 1.05, letterSpacing: '-0.02em' }}
         >
           Let&apos;s build something.
         </h2>
@@ -217,15 +219,15 @@ function LowTierConnectSection({ SOCIAL_LINKS }: { animKeys: any, setAnimKeys: a
         className="flex flex-col sm:flex-row items-center gap-8 sm:gap-14 transition-all duration-700"
         style={{ opacity: visible ? 1 : 0, transform: visible ? 'translateY(0)' : 'translateY(24px)', transitionDelay: '0.3s' }}
       >
-        <a href={SOCIAL_LINKS.github} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 text-white/50 hover:text-[#d97757] transition-colors">
+        <a href={SOCIAL_LINKS.github} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 text-white/50 hover:text-[#e0303d] transition-colors">
           <GitHubIcon size={22} />
           <span className="text-[11px] uppercase tracking-[0.25em] font-bold font-mono">GitHub</span>
         </a>
-        <a href={SOCIAL_LINKS.whatsapp} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 text-white/50 hover:text-[#d97757] transition-colors">
+        <a href={SOCIAL_LINKS.whatsapp} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 text-white/50 hover:text-[#e0303d] transition-colors">
           <WhatsAppIcon size={22} />
           <span className="text-[11px] uppercase tracking-[0.25em] font-bold font-mono">WhatsApp</span>
         </a>
-        <a href={SOCIAL_LINKS.linkedin} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 text-white/50 hover:text-[#d97757] transition-colors">
+        <a href={SOCIAL_LINKS.linkedin} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 text-white/50 hover:text-[#e0303d] transition-colors">
           <LinkedInIcon size={22} />
           <span className="text-[11px] uppercase tracking-[0.25em] font-bold font-mono">LinkedIn</span>
         </a>
@@ -246,9 +248,27 @@ function LowTierConnectSection({ SOCIAL_LINKS }: { animKeys: any, setAnimKeys: a
 export default function ConnectSection() {
   const [scrollPercentage, setScrollPercentage] = useState(0);
   const sectionRef = useRef<HTMLDivElement>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   const { tier, useWebCodecs, isReady } = useAdaptiveQuality();
   const marqueeRef = useRef<HTMLDivElement>(null);
+  const [bitmaps, setBitmaps] = useState<(ImageBitmap | null)[]>([]);
+
+  useEffect(() => {
+    fetch('/frames/connect/meta.json')
+      .then(res => res.json())
+      .then(meta => {
+        const frameCount = meta.count || 155;
+        const urls = Array.from({ length: frameCount }, (_, i) =>
+          `/frames/connect/frame_${String(i + 1).padStart(4, '0')}.jpg`
+        );
+        preloadFrames(urls).then(setBitmaps);
+      })
+      .catch(err => console.error('Failed to load connect frames meta:', err));
+  }, []);
+
+  useScrollVideoScrub(canvasRef, bitmaps, sectionRef, {
+    onUpdate: (progress) => setScrollPercentage(progress)
+  });
 
   // Phase keys — same pattern as Hero (re-triggers animation on entering window)
   const [animKeys, setAnimKeys] = useState({
@@ -272,36 +292,11 @@ export default function ConnectSection() {
   const linksRef = useRef<HTMLDivElement>(null);
   const footerRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    // While not ready, don't set up anything
-    if (!isReady) return;
 
-    const section = sectionRef.current;
-    if (section) {
-      const st = ScrollTrigger.create({
-        trigger: section,
-        start: 'top top',
-        end: 'bottom bottom',
-        scrub: true,
-        onUpdate: (self) => {
-          setScrollPercentage(self.progress);
-
-          // Scrub the hands video on ALL tiers (hardware-accelerated on all devices)
-          const video = videoRef.current;
-          if (video && video.duration && video.readyState >= 2 && !video.seeking) {
-            requestAnimationFrame(() => {
-              video.currentTime = self.progress * video.duration;
-            });
-          }
-        }
-      });
-      return () => st.kill();
-    }
-  }, [isReady]);
 
   useEffect(() => {
     if (!isReady || !marqueeRef.current) return;
-    
+
     const certs = marqueeRef.current.querySelectorAll('.cert-card-animate');
     if (certs.length === 0) return;
 
@@ -380,12 +375,13 @@ export default function ConnectSection() {
   // While quality context initializes, show a minimal shell so name/links are visible
   if (!isReady) {
     return (
-      <div id="connect" className="relative w-full min-h-screen flex flex-col items-center justify-center gap-8 px-8 py-24" style={{ background: '#0d0f12' }}>
-        <h2 className="font-bold text-white text-center" style={{ fontFamily: 'var(--font-mono, monospace)', fontSize: 'clamp(32px, 8vw, 56px)' }}>Let&apos;s build something.</h2>
+      <div id="connect" className="relative w-full min-h-screen flex flex-col items-center justify-center gap-8 px-8 py-24" style={{ background: '#131416' }}>
+        <h2 className="font-bold text-white text-center" style={{ fontFamily: 'Technor, sans-serif', fontSize: 'clamp(32px, 8vw, 56px)' }}>Let&apos;s build something.</h2>
         <div className="flex flex-wrap justify-center gap-8">
-          <a href={SOCIAL_LINKS.github} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 text-white/50 hover:text-[#d97757] transition-colors"><GitHubIcon size={22} /><span className="text-[11px] uppercase tracking-[0.25em] font-bold font-mono">GitHub</span></a>
-          <a href={SOCIAL_LINKS.whatsapp} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 text-white/50 hover:text-[#d97757] transition-colors"><WhatsAppIcon size={22} /><span className="text-[11px] uppercase tracking-[0.25em] font-bold font-mono">WhatsApp</span></a>
-          <a href={SOCIAL_LINKS.linkedin} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 text-white/50 hover:text-[#d97757] transition-colors"><LinkedInIcon size={22} /><span className="text-[11px] uppercase tracking-[0.25em] font-bold font-mono">LinkedIn</span></a>
+          <a href={SOCIAL_LINKS.github} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 text-white/50 hover:text-[#e0303d] transition-colors"><GitHubIcon size={22} /><span className="text-[11px] uppercase tracking-[0.25em] font-bold font-mono">GitHub</span></a>
+          <a href={SOCIAL_LINKS.whatsapp} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 text-white/50 hover:text-[#e0303d] transition-colors"><WhatsAppIcon size={22} /><span className="text-[11px] uppercase tracking-[0.25em] font-bold font-mono">WhatsApp</span></a>
+          <a href={SOCIAL_LINKS.linkedin} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 text-white/50 hover:text-[#e0303d] transition-colors"><LinkedInIcon size={22} /><span className="text-[11px] uppercase tracking-[0.25em] font-bold font-mono">LinkedIn</span></a>
+          <a href={SOCIAL_LINKS.email} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 text-white/50 hover:text-[#e0303d] transition-colors"><Mail size={22} /><span className="text-[11px] uppercase tracking-[0.25em] font-bold font-mono">Email</span></a>
         </div>
       </div>
     );
@@ -396,17 +392,17 @@ export default function ConnectSection() {
       id="connect"
       ref={sectionRef}
       className="relative w-full"
-      style={{ height: '200vh', background: '#0d0f12' }}
+      style={{ height: '200vh', background: '#131416' }}
     >
       {/* ── Top seam gradient + Certificates Marquee ── */}
       <div
-        className="absolute top-0 left-0 right-0 h-[180px] z-[5] overflow-hidden flex flex-col justify-center"
-        style={{ background: 'linear-gradient(to bottom, #a8adac 0%, #646868 35%, #0d0f12 100%)' }}
+        className="absolute top-0 left-0 right-0 h-[180px] z-[20] overflow-hidden flex flex-col justify-center"
+        style={{ background: 'linear-gradient(to bottom, #131416 0%, #261917 50%, #131416 100%)' }}
       >
-        <p className="text-center text-[#181a1b] text-[12px] sm:text-[14px] tracking-[0.3em] font-bold font-mono uppercase mb-4">
+        <p className="text-center text-[#e0303d] text-[12px] sm:text-[14px] tracking-[0.3em] font-bold font-mono uppercase mb-4" style={{ textShadow: '0 2px 10px rgba(0,0,0,0.5)' }}>
           Certifications & Accolades
         </p>
-        
+
         {/* Infinite CSS Marquee */}
         <div className="relative w-full flex overflow-hidden group" ref={marqueeRef}>
           <style>{`
@@ -437,7 +433,7 @@ export default function ConnectSection() {
                   return (
                     <div
                       key={`${i}-${j}`}
-                      className="cert-card-animate group/cert relative flex flex-col justify-center px-6 py-5 min-w-[280px] rounded-md bg-black/30 backdrop-blur-lg border-2 border-[#d97757]/30 transition-all duration-300 hover:-translate-y-1 hover:bg-black/20 hover:border-[#d97757]/60 cursor-default overflow-hidden"
+                      className="cert-card-animate group/cert relative flex flex-col justify-center px-6 py-5 min-w-[280px] rounded-md bg-black/30 backdrop-blur-lg border-2 border-[#e0303d]/30 transition-all duration-300 hover:-translate-y-1 hover:bg-black/20 hover:border-[#e0303d]/60 cursor-default overflow-hidden"
                       style={{
                         boxShadow: `
                           inset 0 1px 0 rgba(255, 255, 255, 0.05),
@@ -452,19 +448,19 @@ export default function ConnectSection() {
                       <div className="absolute inset-0 border border-white/5 rounded-md pointer-events-none" />
 
                       {/* Subtle gradient glow behind the text */}
-                      <div className="absolute inset-0 bg-gradient-to-br from-[#d97757]/10 to-transparent opacity-0 group-hover/cert:opacity-100 transition-opacity duration-500 pointer-events-none" />
-                      
+                      <div className="absolute inset-0 bg-gradient-to-br from-[#e0303d]/10 to-transparent opacity-0 group-hover/cert:opacity-100 transition-opacity duration-500 pointer-events-none" />
+
                       <div className="flex items-center gap-4 relative z-10">
-                        <div className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center shrink-0 group-hover/cert:bg-[#d97757]/20 group-hover/cert:border-[#d97757]/30 transition-colors duration-300 shadow-inner">
-                          <div className="w-2 h-2 rounded-full bg-[#d97757] group-hover/cert:animate-pulse group-hover/cert:shadow-[0_0_10px_2px_rgba(217,119,87,0.6)]" />
+                        <div className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center shrink-0 group-hover/cert:bg-[#e0303d]/20 group-hover/cert:border-[#e0303d]/30 transition-colors duration-300 shadow-inner">
+                          <div className="w-2 h-2 rounded-full bg-[#e0303d] group-hover/cert:animate-pulse group-hover/cert:shadow-[0_0_10px_2px_rgba(217,119,87,0.6)]" />
                         </div>
-                        
+
                         <div className="flex flex-col gap-0.5" style={{ textShadow: '0 2px 4px rgba(0,0,0,0.8)' }}>
                           <EncryptedText
                             text={title}
                             revealDelayMs={30}
                             flipDelayMs={30}
-                            encryptedClassName="text-[#d97757]/80 font-mono text-sm"
+                            encryptedClassName="text-[#e0303d]/80 font-mono text-sm"
                             revealedClassName="text-white font-mono font-bold tracking-tight text-[15px] sm:text-[16px] group-hover/cert:text-[#f0a080] transition-colors duration-300"
                           />
                           <span className="text-white/60 font-mono text-[10px] sm:text-[11px] uppercase tracking-[0.15em]">
@@ -481,18 +477,9 @@ export default function ConnectSection() {
         </div>
       </div>
 
-      {/* ── Background Video Container (Scrubbed on all tiers) ── */}
-      <div className="absolute inset-0 z-0 pointer-events-none">
-        <div className="sticky top-0 w-full h-screen overflow-hidden">
-          <video
-            ref={videoRef}
-            src="/videos/hands-connect-final2.mp4"
-            className="w-full h-full object-cover"
-            muted
-            playsInline
-            preload="auto"
-          />
-        </div>
+      {/* ── Canvas Image Sequence Video ── */}
+      <div className="absolute inset-0 z-0 pointer-events-none bg-[#131416]">
+        <canvas ref={canvasRef} className="sticky top-0 w-full h-screen object-cover object-[center_center] opacity-90" style={{ filter: 'saturate(0.8) brightness(0.9)' }} />
       </div>
 
       {/* ── Overlay + content — sticky viewport ── */}
@@ -504,7 +491,7 @@ export default function ConnectSection() {
             className="absolute inset-0 pointer-events-none"
             style={{
               background:
-                'linear-gradient(to right, rgba(13,15,18,0.5) 0%, rgba(13,15,18,0.2) 50%, transparent 100%), linear-gradient(to top, rgba(13,15,18,0.4) 0%, transparent 40%)',
+                'linear-gradient(to right, rgba(19,20,22,0.85) 0%, rgba(19,20,22,0.4) 50%, rgba(19,20,22,0.1) 100%), linear-gradient(to top, #131416 0%, transparent 30%), linear-gradient(to bottom, #131416 0%, transparent 15%)',
             }}
           />
 
@@ -514,12 +501,12 @@ export default function ConnectSection() {
             className="absolute top-16 left-8 sm:left-14 opacity-0 pointer-events-none"
           >
             <p
-              className="text-[10px] uppercase tracking-[0.35em] font-bold text-[#d97757]"
+              className="text-[10px] uppercase tracking-[0.35em] font-bold text-[#e0303d]"
               style={{ fontFamily: 'var(--font-mono, monospace)', textShadow: '0 2px 10px rgba(0,0,0,0.7)' }}
             >
               Let&apos;s Connect
             </p>
-            <div className="w-16 h-px bg-[#d97757] mt-2 opacity-80" />
+            <div className="w-16 h-px bg-[#e0303d] mt-2 opacity-80" />
           </div>
 
           {/* ── HEADLINE ── upper-left, large */}
@@ -607,6 +594,16 @@ export default function ConnectSection() {
                 icon={<LinkedInIcon size={22} />}
                 label="LinkedIn"
                 delay={180}
+                playKey={animKeys.links}
+              />
+
+              <span className="hidden sm:block w-1 h-1 rounded-full bg-white/20" aria-hidden="true" />
+
+              <SocialLink
+                href={SOCIAL_LINKS.email}
+                icon={<Mail size={22} />}
+                label="Email"
+                delay={270}
                 playKey={animKeys.links}
               />
             </div>

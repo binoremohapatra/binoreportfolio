@@ -5,8 +5,7 @@ import gsap from 'gsap';
 import BlurText from '@/components/ui/reactbits/BlurText';
 import ScrollReveal from '@/components/ui/reactbits/ScrollReveal';
 import SplitText from '@/components/ui/reactbits/SplitText';
-// @ts-ignore
-import ScrollyVideo from 'scrolly-video/dist/ScrollyVideo.esm.jsx';
+import { preloadFrames, useScrollVideoScrub } from '@/hooks/useScrollVideoScrub';
 import { useAdaptiveQuality } from '@/hooks/useAdaptiveQuality';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
@@ -31,15 +30,15 @@ const getTransform = (p: number, enterStart: number, enterEnd: number, exitStart
 function HeroStatText({ value, label, className = "", accentColor = "white" }: { value: string, label: string, className?: string, accentColor?: string }) {
   return (
     <div className={`flex flex-wrap items-center gap-3 sm:gap-5 pointer-events-auto ${className}`}>
-      <span 
-        className="text-[16px] sm:text-[22px] font-bold tracking-tight" 
+      <span
+        className="text-[16px] sm:text-[22px] font-bold tracking-tight"
         style={{ fontFamily: 'var(--font-mono, monospace)', textShadow: '0 4px 20px rgba(0,0,0,0.9)', color: accentColor }}
       >
         {value}
       </span>
       <span className="text-white/20 text-[18px] sm:text-[22px] font-mono leading-none hidden sm:inline">|</span>
-      <span 
-        className="text-[11px] sm:text-[13px] uppercase tracking-[0.2em] text-white/90 font-sans font-bold" 
+      <span
+        className="text-[11px] sm:text-[13px] uppercase tracking-[0.2em] text-white/90 font-sans font-bold"
         style={{ textShadow: '0 4px 20px rgba(0,0,0,0.9)' }}
       >
         {label}
@@ -66,14 +65,32 @@ function FadeUp({ children, delay = 0, playKey = 0 }: { children: React.ReactNod
 export default function HeroSection() {
   const [scrollPercentage, setScrollPercentage] = useState(0);
   const sectionRef = useRef<HTMLDivElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const { tier, useWebCodecs, isReady } = useAdaptiveQuality();
+  const [bitmaps, setBitmaps] = useState<(ImageBitmap | null)[]>([]);
 
   useEffect(() => {
-    // ScrollyVideo's onChange callback drives scrollPercentage on all tiers.
-    // No manual ScrollTrigger needed — ScrollyVideo handles its own scroll tracking.
-    // Nothing to set up here; this effect is reserved for future per-tier setup.
-  }, [tier]);
+    if (typeof window !== 'undefined' && window.__heroFrames) {
+      setBitmaps(window.__heroFrames);
+    } else {
+      // Fallback just in case
+      fetch('/frames/hero/meta.json')
+        .then(res => res.json())
+        .then(meta => {
+          const frameCount = meta.count || 300;
+          const urls = Array.from({ length: frameCount }, (_, i) =>
+            `/frames/hero/frame_${String(i + 1).padStart(4, '0')}.jpg`
+          );
+          preloadFrames(urls).then(setBitmaps);
+        })
+        .catch(err => console.error('Failed to load hero frames meta:', err));
+    }
+  }, []);
+
+  useScrollVideoScrub(canvasRef, bitmaps, sectionRef, {
+    onUpdate: (progress) => setScrollPercentage(progress)
+  });
 
   // Track replays based on entering the scroll window
   const [animKeys, setAnimKeys] = useState({
@@ -176,22 +193,9 @@ export default function HeroSection() {
   return (
     <div ref={sectionRef} className="relative w-full" style={{ height: '830vh', background: '#0d0f12' }}>
 
-      {/* ── ScrollyVideo — always mounted on all tiers once isReady ── */}
-      {/* LOW tier: useWebCodecs=false (seek-based scrubbing, no frame-cache extraction) */}
-      {/* MED/HIGH tier: useWebCodecs=true (faster frame decode via WebCodecs API) */}
-      <div className="absolute inset-0 [&_canvas]:!object-cover [&_canvas]:!object-[75%_center] sm:[&_canvas]:!object-[right_center] [&_video]:!object-cover [&_video]:!object-[75%_center] sm:[&_video]:!object-[right_center]">
-        {isReady && (
-          <ScrollyVideo
-            src="/videos/full_site_intro_720p.mp4"
-            useWebCodecs={useWebCodecs && process.env.NODE_ENV === 'production'}
-            cover={true}
-            sticky={true}
-            full={true}
-            trackScroll={true}
-            transitionSpeed={tier === 'low' ? 4 : tier === 'medium' ? 8 : 12}
-            onChange={(percentage: number) => setScrollPercentage(percentage)}
-          />
-        )}
+      {/* ── Canvas Image Sequence Video ── */}
+      <div className="absolute inset-0 z-0 pointer-events-none">
+        <canvas ref={canvasRef} className="sticky top-0 w-full h-screen object-cover object-[75%_center] sm:object-[right_center]" />
       </div>
 
       {/* Overlay Container */}
@@ -212,8 +216,8 @@ export default function HeroSection() {
             <div className="relative w-full h-[300px]">
 
               {/* PHASE 0: Initial Resume Info */}
-              <div ref={introRef} className="absolute inset-0 flex flex-col justify-center pointer-events-none">
-                <h1 className="flex flex-wrap items-center gap-4 text-5xl sm:text-7xl font-bold tracking-tighter mb-4" style={{ fontFamily: 'var(--font-mono, "JetBrains Mono", monospace)', textShadow: '0 4px 24px rgba(0,0,0,0.6)' }}>
+              <div ref={introRef} className="absolute inset-0 flex flex-col justify-center pointer-events-none" style={{ fontFamily: 'Technor, sans-serif' }}>
+                <h1 className="flex flex-wrap items-center gap-4 text-5xl sm:text-7xl font-bold tracking-tighter mb-4" style={{ textShadow: '0 4px 24px rgba(0,0,0,0.6)' }}>
                   <BlurText
                     key={`p0-1-${animKeys.phase0}`}
                     text="BINORE"
@@ -228,9 +232,10 @@ export default function HeroSection() {
                     delay={40}
                     animateBy="letters"
                     direction="top"
-                    className="text-[#d97757]"
+                    className="text-[var(--color-accent)]"
                   />
                 </h1>
+
                 {animKeys.phase0 > 0 && (
                   <>
                     <ScrollReveal
@@ -240,12 +245,12 @@ export default function HeroSection() {
                       baseOpacity={0}
                       baseRotation={0}
                       blurStrength={10}
-                      textClassName="text-xl sm:text-2xl text-white font-sans font-medium mb-6 drop-shadow-md"
+                      textClassName="text-xl sm:text-2xl text-white font-medium mb-5 drop-shadow-md"
                     >
                       Full-Stack Developer Intern
                     </ScrollReveal>
-                    
-                    <div className="font-mono text-sm leading-relaxed max-w-lg uppercase tracking-wider text-white font-semibold drop-shadow-md min-h-[48px] sm:min-h-[40px]">
+
+                    <div className="text-[10px] sm:text-xs uppercase tracking-[0.2em] text-white/80 font-bold drop-shadow-md min-h-[30px] overflow-hidden whitespace-nowrap text-ellipsis max-w-full">
                       <ScrollReveal
                         customTriggerRef={sectionRef}
                         customStart="top top"
@@ -270,7 +275,7 @@ export default function HeroSection() {
                     delay={30}
                     animateBy="words"
                     direction="top"
-                    className="tracking-[0.22em] text-sm font-bold text-[#d97757] uppercase font-mono"
+                    className="tracking-[0.22em] text-sm font-bold text-[var(--color-accent)] uppercase font-mono"
                   />
                 )}
               </div>
@@ -280,7 +285,7 @@ export default function HeroSection() {
                 <div
                   className="leading-[1.05] tracking-tighter"
                   style={{
-                    fontFamily: 'var(--font-mono, "JetBrains Mono", monospace)',
+                    fontFamily: 'Technor, sans-serif',
                     fontSize: 'clamp(48px, 7vw, 84px)',
                     color: '#ffffff',
                     fontWeight: 800,
@@ -330,7 +335,7 @@ export default function HeroSection() {
                       style={{ fontFamily: 'var(--font-mono, monospace)' }}
                     >
                       <span className="relative z-10 group-hover:text-white transition-colors duration-300">View My Work</span>
-                      <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-[#d97757] transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
+                      <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-[var(--color-accent)] transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
                     </a>
                   </FadeUp>
                   <FadeUp playKey={animKeys.phase4} delay={100}>
@@ -340,7 +345,7 @@ export default function HeroSection() {
                       style={{ fontFamily: 'var(--font-mono, monospace)' }}
                     >
                       Get in Touch
-                      <div className="absolute bottom-2 left-6 right-6 h-[2px] bg-[#ffffff] opacity-30 group-hover:bg-[#2dd4bf] group-hover:opacity-100 transition-all duration-300" />
+                      <div className="absolute bottom-2 left-6 right-6 h-[2px] bg-[#ffffff] opacity-30 group-hover:bg-[var(--color-accent)] group-hover:opacity-100 transition-all duration-300" />
                     </a>
                   </FadeUp>
                 </div>
@@ -353,7 +358,7 @@ export default function HeroSection() {
               {/* PHASE 6: WHO I AM */}
               <div ref={whoRef} className="absolute inset-0 flex flex-col justify-center pointer-events-none opacity-0">
                 <p
-                  className="text-[12px] uppercase tracking-[0.3em] font-bold text-[#d97757] mb-3"
+                  className="text-[12px] uppercase tracking-[0.3em] font-bold text-[var(--color-accent)] mb-3"
                   style={{ fontFamily: 'var(--font-mono, monospace)', textShadow: '0 2px 12px rgba(0,0,0,0.8)' }}
                 >
                   WHO I AM
@@ -361,7 +366,7 @@ export default function HeroSection() {
                 <div
                   className="leading-[1.1] tracking-tight"
                   style={{
-                    fontFamily: 'var(--font-sans, "Inter", sans-serif)',
+                    fontFamily: 'Technor, sans-serif',
                     fontSize: 'clamp(32px, 5vw, 56px)',
                     color: '#ffffff',
                     fontWeight: 700,
@@ -386,7 +391,7 @@ export default function HeroSection() {
               {/* PHASE 7: CURRENT WORK */}
               <div ref={workRef} className="absolute inset-0 flex flex-col justify-center pointer-events-none opacity-0">
                 <p
-                  className="text-[12px] uppercase tracking-[0.3em] font-bold text-[#2dd4bf] mb-3"
+                  className="text-[12px] uppercase tracking-[0.3em] font-bold text-[var(--color-accent)] mb-3"
                   style={{ fontFamily: 'var(--font-mono, monospace)', textShadow: '0 2px 12px rgba(0,0,0,0.8)' }}
                 >
                   CURRENT WORK
@@ -394,7 +399,7 @@ export default function HeroSection() {
                 <div
                   className="leading-[1.15] tracking-tight"
                   style={{
-                    fontFamily: 'var(--font-sans, "Inter", sans-serif)',
+                    fontFamily: 'Technor, sans-serif',
                     fontSize: 'clamp(28px, 4.5vw, 48px)',
                     color: '#ffffff',
                     fontWeight: 700,
@@ -419,7 +424,7 @@ export default function HeroSection() {
               {/* PHASE 8: PHILOSOPHY */}
               <div ref={philRef} className="absolute inset-0 flex flex-col justify-center pointer-events-none opacity-0">
                 <p
-                  className="text-[12px] uppercase tracking-[0.3em] font-bold text-[#d97757] mb-3"
+                  className="text-[12px] uppercase tracking-[0.3em] font-bold text-[var(--color-accent)] mb-3"
                   style={{ fontFamily: 'var(--font-mono, monospace)', textShadow: '0 2px 12px rgba(0,0,0,0.8)' }}
                 >
                   PHILOSOPHY
@@ -427,7 +432,7 @@ export default function HeroSection() {
                 <div
                   className="leading-[1.1] tracking-tight"
                   style={{
-                    fontFamily: 'var(--font-sans, "Inter", sans-serif)',
+                    fontFamily: 'Technor, sans-serif',
                     fontSize: 'clamp(32px, 5vw, 56px)',
                     color: '#ffffff',
                     fontWeight: 700,
@@ -454,7 +459,7 @@ export default function HeroSection() {
                 <div
                   className="leading-[1.1] tracking-tight"
                   style={{
-                    fontFamily: 'var(--font-sans, "Inter", sans-serif)',
+                    fontFamily: 'Technor, sans-serif',
                     fontSize: 'clamp(32px, 5vw, 56px)',
                     color: '#ffffff',
                     fontWeight: 700,
@@ -482,7 +487,7 @@ export default function HeroSection() {
 
           {/* Phase 5 HUD Cards: Redistributed left and right, moved higher up to avoid torso overlap */}
           <div ref={hudRef} className="absolute top-1/2 -translate-y-1/2 left-6 right-6 sm:left-12 sm:right-12 z-20 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-8 pointer-events-none">
-            
+
             {/* Left Stats Column */}
             <div className="flex flex-col items-start gap-4">
               <FadeUp playKey={animKeys.phase5} delay={0}>
@@ -490,7 +495,7 @@ export default function HeroSection() {
                   value="10+ Projects Shipped"
                   label="All documented on GitHub"
                   className="justify-start"
-                  accentColor="#2dd4bf"
+                  accentColor="var(--color-accent)"
                 />
               </FadeUp>
               <FadeUp playKey={animKeys.phase5} delay={40}>
@@ -498,7 +503,7 @@ export default function HeroSection() {
                   value="8.07 CGPA"
                   label="B.Tech CSE, GGSIPU Delhi"
                   className="justify-start"
-                  accentColor="#2dd4bf"
+                  accentColor="var(--color-accent)"
                 />
               </FadeUp>
             </div>
@@ -510,7 +515,7 @@ export default function HeroSection() {
                   value="Class of '28 · B.Tech CSE"
                   label="Expected Graduation"
                   className="justify-start sm:justify-end"
-                  accentColor="#d97757"
+                  accentColor="var(--color-accent)"
                 />
               </FadeUp>
               <FadeUp playKey={animKeys.phase5} delay={160}>
@@ -518,7 +523,7 @@ export default function HeroSection() {
                   value="2 Live Internships"
                   label="OM Associates • Suvidha Mahila Mandal"
                   className="justify-start sm:justify-end"
-                  accentColor="#3b82f6"
+                  accentColor="var(--color-accent)"
                 />
               </FadeUp>
             </div>

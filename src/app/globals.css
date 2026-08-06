@@ -1,12 +1,28 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
+@import url('https://api.fontshare.com/v2/css?f[]=technor@400,500,600,700,800&display=swap');
 @import "tailwindcss";
 
+@font-face {
+  font-family: 'Hazard';
+  src: url('/fonts/Hazard.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
 @theme inline {
-  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-sans);
   --font-serif: var(--font-serif);
   --font-mono: var(--font-mono);
+  --font-display: var(--font-display);
 
   --animate-border-beam: border-beam calc(var(--duration)*1s) infinite linear;
+
+  /* Tailwind color tokens */
+  --color-crimson: var(--color-accent);
+  --color-heading-white: #f5f5f5;
+  --color-neutral-text: #a8adac;
+  --color-base-navy: #131416;
 }
 
 @keyframes border-beam {
@@ -16,9 +32,55 @@
 }
 
 @layer base {
+  :root {
+    /* Locked Crimson Palette (Neutral Site + Hero Crimson) */
+    --color-accent: #e0303d;
+    --color-accent-muted: #9c2b2b;
+    --bg-primary: #131416;
+    --bg-secondary: #261917;
+    --bg-dark: #261917;
+    --text-primary: #ffffff;
+    --text-muted: #a8adac;
+    --text-dark: #000000;
+  }
+
+  .theme-crimson {
+    /* Crimson is now the default */
+    --color-accent: #e0303d;
+    --color-accent-muted: #9c2b2b;
+    --bg-primary: #131416;
+    --bg-secondary: #261917;
+    --bg-dark: #261917;
+    --text-primary: #ffffff;
+    --text-muted: #a8adac;
+    --text-dark: #ffffff;
+  }
+
+  .theme-monochrome {
+    --color-accent: #888888;
+    --color-accent-muted: #444444;
+    --bg-primary: #111111;
+    --bg-secondary: #222222;
+    --bg-dark: #000000;
+    --text-primary: #ffffff;
+    --text-muted: #888888;
+    --text-dark: #ffffff;
+  }
+
+  .theme-hybrid {
+    --color-accent: #e0303d;
+    --color-accent-muted: #9c2b2b;
+    --bg-primary: #131416;
+    --bg-secondary: #261917;
+    --bg-dark: #261917;
+    --text-primary: #ffffff;
+    --text-muted: #a8adac;
+    --text-dark: #000000;
+  }
+
   body {
-    background-color: #ffffff;
-    color: #0d0f12;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
     font-family: var(--font-sans);
     overflow-x: clip;
     -webkit-font-smoothing: antialiased;
@@ -34,7 +96,8 @@
 }
 
 /* Lenis Recommended CSS */
-html.lenis, html.lenis body {
+html.lenis,
+html.lenis body {
   height: auto;
 }
 
@@ -56,13 +119,24 @@ html.lenis, html.lenis body {
 
 /* Typewriter cursor blink */
 @keyframes blink {
-  0%, 100% { opacity: 1; }
-  50%       { opacity: 0; }
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0;
+  }
 }
-.animate-blink { animation: blink 1s step-end infinite; }
+
+.animate-blink {
+  animation: blink 1s step-end infinite;
+}
 
 /* ── Reduced Motion ── */
 @media (prefers-reduced-motion: reduce) {
+
   *,
   *::before,
   *::after {
@@ -82,7 +156,10 @@ html.lenis, html.lenis body {
 
 /* ── Minimum Touch Targets ── */
 @media (pointer: coarse) {
-  a, button, [role="button"] {
+
+  a,
+  button,
+  [role="button"] {
     min-height: 44px;
     min-width: 44px;
   }

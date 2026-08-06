@@ -73,7 +73,7 @@ export function TheWork() {
 
   return (
     <div ref={containerRef} className="relative min-h-screen bg-[#0d0f12] py-32 px-6 lg:px-24">
-      <div className="font-mono text-[10px] uppercase tracking-[0.35em] text-[#d97757] select-none mb-4 text-center font-bold">
+      <div className="font-mono text-[10px] uppercase tracking-[0.35em] text-[#e0303d] select-none mb-4 text-center font-bold">
         SHIPPED PRODUCTS
       </div>
 
@@ -118,7 +118,7 @@ export function TheWork() {
                     <div className="mt-8 space-y-4">
                       {/* Domain Tag (Always visible) */}
                       <CardItem translateZ={40} className="w-full">
-                        <span className="inline-block px-3 py-1 font-mono text-[10px] uppercase tracking-wider text-[#d97757] bg-[#d97757]/10 rounded-sm">
+                        <span className="inline-block px-3 py-1 font-mono text-[10px] uppercase tracking-wider text-[#e0303d] bg-[#e0303d]/10 rounded-sm">
                           {project.domain}
                         </span>
                       </CardItem>

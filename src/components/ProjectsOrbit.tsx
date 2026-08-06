@@ -78,7 +78,7 @@ function DnaHelixSvg() {
             y1={r.y}
             x2={r.xB}
             y2={r.y}
-            stroke="#d97757"
+            stroke="#e0303d"
             strokeWidth="1"
             opacity="0.35"
             filter="url(#dnaGlow)"
@@ -88,7 +88,7 @@ function DnaHelixSvg() {
         <path
           d={strandA}
           fill="none"
-          stroke="#d97757"
+          stroke="#e0303d"
           strokeWidth="1.6"
           opacity="0.9"
           filter="url(#dnaGlow)"
@@ -104,7 +104,7 @@ function DnaHelixSvg() {
 
         {rungs.map((r, idx) => (
           <g key={`dots-${idx}`}>
-            <circle cx={r.xA} cy={r.y} r="2" fill="#d97757" filter="url(#dnaGlow)" />
+            <circle cx={r.xA} cy={r.y} r="2" fill="#e0303d" filter="url(#dnaGlow)" />
             <circle cx={r.xB} cy={r.y} r="2" fill="#e8eaea" opacity="0.6" filter="url(#dnaGlow)" />
           </g>
         ))}
@@ -126,24 +126,23 @@ function DnaHelixSvg() {
 
 
 const PROJECTS = [
-  { id: 8, title: 'OM Associates', category: 'TypeScript', github: 'https://github.com/binoremohapatra/om-associates', link: 'https://om-associates.vercel.app' },
-  { id: 2, title: 'Research.connect', category: 'Project', github: 'https://github.com/binoremohapatra/Research.connect', link: 'https://research-connect-pink.vercel.app', iframeDisabled: true, image: '/images/research-connect.png' },
-  { id: 4, title: 'SubMeter', category: 'Java', github: 'https://github.com/binoremohapatra/submeter', link: 'https://submeter-lac.vercel.app' },
-  { id: 12, title: 'Portfolio v2', category: 'JavaScript', github: 'https://github.com/binoremohapatra/binore-portfolio', link: 'https://binore-portfolio.vercel.app' },
-  { id: 13, title: 'Portfolio Binore', category: 'JavaScript', github: 'https://github.com/binoremohapatra/Portfolio-Binore', link: 'https://portfolio-binore.vercel.app' },
-  { id: 6, title: 'ReactorX', category: 'JavaScript', github: 'https://github.com/binoremohapatra/reactorx', link: 'https://reactorx-chi.vercel.app' },
-  { id: 1, title: 'SwiftRoute', category: 'JavaScript', github: 'https://github.com/binoremohapatra/SwiftRoute', link: 'https://swiftroute-ten.vercel.app' },
-  { id: 10, title: 'SheCan Foundation', category: 'TypeScript', github: 'https://github.com/binoremohapatra/shecanfoundation', link: 'https://shecanfoundation-tan.vercel.app' },
-  { id: 9, title: 'Naye Pankh Foundation', category: 'TypeScript', github: 'https://github.com/binoremohapatra/nayepankhfoundation', link: 'https://nayepankhfoundation-p6ii.vercel.app' },
-  { id: 3, title: 'Mavis AI', category: 'TypeScript', github: 'https://github.com/binoremohapatra/mavisai', link: 'https://mavisai.vercel.app' },
-  { id: 5, title: 'CivicSolver', category: 'JavaScript', github: 'https://github.com/binoremohapatra/Civicsolver', link: 'https://civicsolver.vercel.app' },
-  { id: 99, title: 'Maeve AI', category: 'Python', github: null, link: null },
-  { id: 14, title: 'CityVoice', category: 'Dart', github: 'https://github.com/binoremohapatra/CityVoice', link: null },
-  { id: 15, title: 'civicsolverapp', category: 'Dart', github: 'https://github.com/binoremohapatra/civicsolverapp', link: null },
-  { id: 20, title: 'mavisai-core', category: 'Java', github: 'https://github.com/binoremohapatra/mavisai-core', link: null },
-  { id: 23, title: 'Suraksha-Setu-tourist-safety-app', category: 'Project', github: 'https://github.com/binoremohapatra/Suraksha-Setu-tourist-safety-app', link: null },
-  { id: 11, title: 'Library System', category: 'Java', github: 'https://github.com/binoremohapatra/library-management-system', link: null },
-  { id: 17, title: 'bankmangementsystem', category: 'Java', github: 'https://github.com/binoremohapatra/bankmangementsystem', link: null },
+  { id: 8, title: 'OM Associates', category: 'TypeScript', github: 'https://github.com/binoremohapatra/om-associates', link: 'https://om-associates.vercel.app', tech: 'NEXT.JS · TYPESCRIPT · TAILWIND' },
+  { id: 2, title: 'Research.connect', category: 'Project', github: 'https://github.com/binoremohapatra/Research.connect', link: 'https://research-connect-pink.vercel.app', iframeDisabled: true, image: '/images/research-connect.png', tech: 'HTML · CSS · JAVASCRIPT' },
+  { id: 4, title: 'SubMeter', category: 'Java', github: 'https://github.com/binoremohapatra/submeter', link: 'https://submeter-lac.vercel.app', tech: 'JAVA · SPRING BOOT · MYSQL' },
+  { id: 12, title: 'Portfolio v2', category: 'JavaScript', github: 'https://github.com/binoremohapatra/binore-portfolio', link: 'https://binore-portfolio.vercel.app', tech: 'REACT · JAVASCRIPT · TAILWIND' },
+  { id: 13, title: 'Portfolio Binore', category: 'JavaScript', github: 'https://github.com/binoremohapatra/Portfolio-Binore', link: 'https://portfolio-binore.vercel.app', tech: 'REACT · NODE.JS · JAVASCRIPT' },
+  { id: 6, title: 'ReactorX', category: 'JavaScript', github: 'https://github.com/binoremohapatra/reactorx', link: 'https://reactorx-chi.vercel.app', tech: 'REACT · NODE.JS · MONGODB' },
+  { id: 1, title: 'SwiftRoute', category: 'JavaScript', github: 'https://github.com/binoremohapatra/SwiftRoute', link: 'https://swiftroute-ten.vercel.app', tech: 'REACT · NODE.JS · EXPRESS' },
+  { id: 10, title: 'SheCan Foundation', category: 'TypeScript', github: 'https://github.com/binoremohapatra/shecanfoundation', link: 'https://shecanfoundation-tan.vercel.app', tech: 'NEXT.JS · TYPESCRIPT · TAILWIND' },
+  { id: 9, title: 'Naye Pankh Foundation', category: 'TypeScript', github: 'https://github.com/binoremohapatra/nayepankhfoundation', link: 'https://nayepankhfoundation-p6ii.vercel.app', tech: 'NEXT.JS · TYPESCRIPT · TAILWIND' },
+  { id: 3, title: 'Mavis AI', category: 'TypeScript', github: 'https://github.com/binoremohapatra/mavisai', link: 'https://mavisai.vercel.app', tech: 'NEXT.JS · TYPESCRIPT · OPENAI' },
+  { id: 5, title: 'CivicSolver', category: 'JavaScript', github: 'https://github.com/binoremohapatra/Civicsolver', link: 'https://civicsolver.vercel.app', tech: 'REACT · NODE.JS · FIREBASE' },
+  { id: 99, title: 'Maeve AI', category: 'Python', github: null, link: null, image: '/images/maeve_ai_preview.png', tech: 'PYTHON · MACHINE LEARNING · AI' },
+  { id: 14, title: 'CityVoice', category: 'Dart', github: 'https://github.com/binoremohapatra/CityVoice', link: null, image: '/images/cityvoice_preview.png', tech: 'FLUTTER · DART · FIREBASE' },
+  { id: 15, title: 'civicsolverapp', category: 'Dart', github: 'https://github.com/binoremohapatra/civicsolverapp', link: null, image: '/images/civicsolverapp_preview.png', tech: 'FLUTTER · DART · FIREBASE' },
+  { id: 23, title: 'Suraksha-Setu-tourist-safety-app', category: 'Project', github: 'https://github.com/binoremohapatra/Suraksha-Setu-tourist-safety-app', link: null, image: '/images/suraksha_setu_preview.png', tech: 'PYTHON · MACHINE LEARNING' },
+  { id: 11, title: 'Library System', category: 'Java', github: 'https://github.com/binoremohapatra/library-management-system', link: null, image: '/images/library_system_preview.png', tech: 'JAVA · SWING · MYSQL' },
+  { id: 17, title: 'bankmangementsystem', category: 'Java', github: 'https://github.com/binoremohapatra/bankmangementsystem', link: null, image: '/images/bankmangementsystem_preview.png', tech: 'JAVA · SWING · MYSQL' },
 ];
 
 // ---------------------------------------------------------------------------
@@ -215,9 +214,9 @@ const PLACEHOLDER_CONFIG: Record<string, { icon: any, color: string, label: stri
   },
   'Suraksha-Setu-tourist-safety-app': {
     icon: ShieldCheck,
-    color: '#d97757', // Orange-red
+    color: '#e0303d', // Orange-red
     label: 'SECURITY',
-    pattern: 'linear-gradient(30deg, rgba(217,119,87,0.07) 1px, transparent 1px), linear-gradient(-30deg, rgba(217,119,87,0.07) 1px, transparent 1px)',
+    pattern: 'linear-gradient(30deg, rgba(224,48,61,0.07) 1px, transparent 1px), linear-gradient(-30deg, rgba(224,48,61,0.07) 1px, transparent 1px)',
     patternSize: '20px 34px'
   },
   'Maeve AI': {
@@ -319,16 +318,23 @@ function ActiveOnlyIframe({ url }: { url: string }) {
 
 export default function ProjectsOrbit() {
   const { allow3DOrbit } = useAdaptiveQuality();
+  const [cardVariant, setCardVariant] = useState('option2');
+
+  useEffect(() => {
+    const handleVariantChange = (e: Event) => setCardVariant((e as CustomEvent).detail);
+    window.addEventListener('cardVariantChange', handleVariantChange);
+    return () => window.removeEventListener('cardVariantChange', handleVariantChange);
+  }, []);
 
   // LOW tier: flat grid — no 3D orbit, no WebGL, no iframes.
   // Hooks are NOT violated because this is the top of the component,
   // and allow3DOrbit comes from context (no hook after the return).
   if (!allow3DOrbit) {
     return (
-      <section id="projects" className="relative w-full py-20 px-4 sm:px-8" style={{ background: '#a8adac' }}>
+      <section id="projects" className="relative w-full py-20 px-4 sm:px-8 bg-[var(--bg-primary)]">
         <div className="max-w-5xl mx-auto">
-          <p className="text-[10px] uppercase tracking-[0.35em] font-bold text-[#0d0f12]/60 mb-2 font-mono">Projects</p>
-          <h2 className="text-3xl sm:text-4xl font-bold text-[#0d0f12] mb-10" style={{ fontFamily: 'var(--font-mono, monospace)' }}>
+          <p className="text-[10px] uppercase tracking-[0.35em] font-bold mb-2 font-mono" style={{ color: 'var(--text-primary)', opacity: 0.6 }}>Projects</p>
+          <h2 className="text-3xl sm:text-4xl font-bold mb-10" style={{ fontFamily: 'Technor, sans-serif', color: 'var(--text-primary)' }}>
             Things I&apos;ve built.
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -371,8 +377,8 @@ export default function ProjectsOrbit() {
 
                   <div className="relative z-10 flex gap-4 mt-auto pt-5 border-t border-white/5">
                     {project.link && (
-                      <span className="flex items-center gap-2 text-[10px] font-bold text-[#2dd4bf] font-mono uppercase tracking-widest transition-colors hover:text-white">
-                        <span className="w-1.5 h-1.5 rounded-full bg-[#2dd4bf] animate-pulse shadow-[0_0_8px_#2dd4bf]" /> LIVE
+                      <span className="flex items-center gap-2 text-[10px] font-bold text-[var(--color-accent)] font-mono uppercase tracking-widest transition-colors hover:text-white">
+                        <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-accent)] animate-pulse shadow-[0_0_8px_var(--color-accent)]" /> LIVE
                       </span>
                     )}
                     {project.github && (
@@ -391,11 +397,11 @@ export default function ProjectsOrbit() {
   }
 
   // Medium/High: full 3D orbit
-  return <ProjectsOrbit3D />;
+  return <ProjectsOrbit3D cardVariant={cardVariant} />;
 }
 
 // ─── Full 3D Orbit (MEDIUM + HIGH tier) ─────────────────────────────────────
-function ProjectsOrbit3D() {
+function ProjectsOrbit3D({ cardVariant }: { cardVariant: string }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const rotorRef = useRef<HTMLDivElement>(null);
   const cardsRef = useRef<(HTMLDivElement | null)[]>([]);
@@ -446,6 +452,11 @@ function ProjectsOrbit3D() {
             // Mathematically perfect rotation to reach the final card
             const totalRotation = -(totalCards - 1) * angleIncrement;
             const currentRotorAngle = progress * totalRotation;
+
+            // Dispatch to DNA model
+            if (typeof window !== 'undefined') {
+              window.dispatchEvent(new CustomEvent('dnaRotate', { detail: currentRotorAngle }));
+            }
 
             let closestIndex = 0;
             let minDiff = Infinity;
@@ -556,7 +567,7 @@ function ProjectsOrbit3D() {
     <section
       id="projects"
       ref={containerRef}
-      className="relative h-screen w-full overflow-hidden bg-[#a8adac] text-gray-900 flex items-center justify-center scroll-touch-fix"
+      className="relative h-screen w-full overflow-hidden text-gray-900 flex items-center justify-center scroll-touch-fix bg-[var(--bg-primary)]"
       style={{ perspective: tier === 'low' ? '2000px' : '4000px' }}
     >
 
@@ -604,14 +615,14 @@ function ProjectsOrbit3D() {
             }}
           >
             {/* Full-bleed preview fills the whole card */}
-            <div className="absolute inset-0 z-0">
-              {project.link ? (
-                i === activeCardIndex && !(project as any).iframeDisabled && allowLiveIframes ? (
+            <div className="absolute inset-0 z-0 bg-[#0d0f12]">
+              {project.link || (project as any).image ? (
+                project.link && i === activeCardIndex && !(project as any).iframeDisabled && allowLiveIframes ? (
                   <ActiveOnlyIframe url={project.link} />
                 ) : (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
-                    src={(project as any).image || `https://image.thum.io/get/width/800/crop/800/${project.link}`}
+                    src={(project as any).image || (project.link ? `https://image.thum.io/get/width/800/crop/800/${project.link}` : '')}
                     alt={`${project.title} preview`}
                     className="w-full h-full object-cover object-top opacity-80 group-hover:opacity-100 transition-opacity duration-300"
                     loading="lazy"
@@ -622,26 +633,73 @@ function ProjectsOrbit3D() {
               )}
             </div>
 
-            {/* Hover/touch overlay with title/category/buttons */}
-            <div className={`absolute inset-0 z-10 bg-gradient-to-t from-black/90 via-black/40 to-transparent flex flex-col justify-end p-3 sm:p-4 ${isTouchDevice
-              ? 'opacity-100' /* Always visible on touch — no hover on mobile */
-              : 'opacity-0 group-hover:opacity-100 transition-opacity duration-300'
-              }`}>
-              <p className="font-mono text-[8px] uppercase tracking-widest text-[#d97757] mb-1">{project.category}</p>
-              <h3 className="text-xs sm:text-sm md:text-lg font-bold text-white mb-2">{project.title}</h3>
-              <div className="flex gap-1.5">
-                {project.link && (
-                  <a href={project.link} target="_blank" rel="noopener noreferrer"
-                    className="px-2 py-1.5 sm:py-1 bg-[#d97757] text-white text-[8px] font-bold font-mono rounded-sm hover:bg-[#e4896a] inline-flex items-center justify-center"
-                    onClick={(e) => e.stopPropagation()}>LIVE ↗</a>
-                )}
-                {project.github && (
-                  <a href={project.github} target="_blank" rel="noopener noreferrer"
-                    className="px-2 py-1.5 sm:py-1 bg-white/10 text-white text-[8px] font-bold font-mono border border-white/20 rounded-sm hover:bg-white/20 inline-flex items-center justify-center"
-                    onClick={(e) => e.stopPropagation()}>GITHUB</a>
-                )}
+            {/* ── CARD VARIANT OVERLAYS ── */}
+            {cardVariant === 'option1' && (
+              <div className={`absolute inset-0 z-10 flex flex-col justify-end p-3 sm:p-4 border border-[var(--color-accent)] transition-all duration-300 ${isTouchDevice ? 'bg-black/60 opacity-100' : 'bg-black/0 opacity-0 group-hover:bg-black/80 group-hover:opacity-100 group-hover:shadow-[0_0_20px_var(--color-accent)]'}`}>
+                <p className="font-mono text-[8px] uppercase tracking-widest text-[var(--color-accent)] mb-1">[ {project.category} ]</p>
+                <h3 className="text-xs sm:text-sm md:text-lg font-bold text-white mb-2">{project.title}</h3>
+                <div className="flex gap-1.5">
+                  {project.link && (
+                    <a href={project.link} target="_blank" rel="noopener noreferrer"
+                      className="px-2 py-1.5 sm:py-1 bg-[var(--color-accent)] text-white text-[8px] font-bold font-mono rounded-sm hover:opacity-80 inline-flex items-center justify-center"
+                      onClick={(e) => e.stopPropagation()}>LIVE ↗</a>
+                  )}
+                  {project.github && (
+                    <a href={project.github} target="_blank" rel="noopener noreferrer"
+                      className="px-2 py-1.5 sm:py-1 bg-white/10 text-white text-[8px] font-bold font-mono border border-white/20 rounded-sm hover:bg-white/20 inline-flex items-center justify-center"
+                      onClick={(e) => e.stopPropagation()}>GITHUB</a>
+                  )}
+                </div>
               </div>
-            </div>
+            )}
+
+            {cardVariant === 'option2' && (
+              <div className={`absolute inset-0 z-10 flex flex-col justify-end p-4 sm:p-5 transition-all duration-500 border border-white/10 rounded-2xl group-hover:border-[var(--color-accent)] group-hover:shadow-[0_0_25px_color-mix(in_srgb,var(--color-accent)_40%,transparent)]`}>
+                <div className="absolute inset-0 pointer-events-none z-[-1] bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+
+                <div className="flex flex-col gap-2 relative z-20">
+                  <div className="flex items-center justify-between">
+                    <span className="inline-block px-2 py-0.5 bg-white text-black text-[9px] font-bold uppercase tracking-widest rounded-full font-sans">
+                      {project.category}
+                    </span>
+                    {project.link && (
+                      <a href={project.link} target="_blank" rel="noopener noreferrer"
+                        className="text-[10px] font-bold text-white hover:text-[var(--color-accent)] transition-colors inline-flex items-center uppercase font-mono tracking-widest"
+                        onClick={(e) => e.stopPropagation()}>LIVE ↗</a>
+                    )}
+                  </div>
+
+                  <h3 className="text-sm sm:text-lg md:text-xl font-bold text-white mt-1 font-sans">{project.title}</h3>
+
+                  <div className="flex flex-wrap gap-x-3 gap-y-1 mt-1 text-[8px] sm:text-[9px] text-[var(--color-accent)] font-mono tracking-widest uppercase">
+                    {(project as any).tech ? (project as any).tech.split('·').map((t: string) => <span key={t}>{t.trim()}</span>) : <span>REACT NODE.JS MONGODB</span>}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {cardVariant === 'option3' && (
+              <div className={`absolute inset-0 z-10 flex flex-col bg-black/80 font-mono border border-white/20 p-0 transition-all duration-300 ${isTouchDevice ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
+                <div className="h-6 bg-white/10 flex items-center px-2 gap-1.5">
+                  <div className="w-2 h-2 rounded-full bg-red-500" />
+                  <div className="w-2 h-2 rounded-full bg-yellow-500" />
+                  <div className="w-2 h-2 rounded-full bg-green-500" />
+                  <span className="ml-2 text-[8px] text-white/50">~/projects/{project.title.toLowerCase().replace(/\s+/g, '-')}</span>
+                </div>
+                <div className="p-3 sm:p-4 flex-1 flex flex-col justify-end">
+                  <p className="text-[10px] text-[var(--color-accent)] mb-1">&gt; cat category.txt</p>
+                  <p className="text-[10px] text-white/80 mb-3">{project.category}</p>
+                  <h3 className="text-xs sm:text-sm md:text-lg font-bold text-white mb-2">{project.title}<span className="animate-blink inline-block w-2 h-4 bg-[var(--color-accent)] ml-1 align-middle" /></h3>
+                  <div className="flex gap-2">
+                    {project.link && (
+                      <a href={project.link} target="_blank" rel="noopener noreferrer"
+                        className="text-[8px] text-white hover:text-[var(--color-accent)] transition-colors"
+                        onClick={(e) => e.stopPropagation()}>[ EXECUTE ]</a>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         ))}
       </div>
@@ -649,7 +707,7 @@ function ProjectsOrbit3D() {
       {/* Vignette */}
       <div
         className="absolute inset-0 pointer-events-none z-20"
-        style={{ background: 'radial-gradient(ellipse at center, transparent 30%, #a8adac 100%)' }}
+        style={{ background: 'radial-gradient(ellipse at center, transparent 30%, var(--bg-primary) 100%)' }}
       />
 
       <style jsx>{`
@@ -662,8 +720,8 @@ function ProjectsOrbit3D() {
           filter: brightness(1.15) !important;
         }
         .orbit-card.is-active {
-          box-shadow: 0 0 40px rgba(217, 119, 87, 0.4);
-          border-color: rgba(217, 119, 87, 0.6);
+          box-shadow: 0 0 40px rgba(224, 48, 61, 0.4);
+          border-color: rgba(224, 48, 61, 0.6);
         }
         /* Hide the DNA helix (and its per-frame CSS animation) on all cards
            except the active one — keeps only one helix animating at a time
