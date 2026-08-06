@@ -80,8 +80,8 @@ export function AppPreloader({ children }: { children: React.ReactNode }) {
         
         window.__heroFrames = bitmaps;
         
-        // Background stream the rest with strict concurrency limits to prevent network saturation
-        const MAX_CONCURRENT = 4;
+        // Background stream the rest with higher concurrency so the user doesn't hit missing frames when scrolling
+        const MAX_CONCURRENT = 6;
         let currentIdx = priorityCount;
         let activeRequests = 0;
 
@@ -94,20 +94,34 @@ export function AppPreloader({ children }: { children: React.ReactNode }) {
             
             fetch(urls[i])
               .then(res => res.ok ? res.blob() : Promise.reject(new Error("HTTP " + res.status)))
-              .then(blob => createImageBitmap(blob))
+              .then(blob => {
+                 // Decode safely to avoid freezing UI
+                 return new Promise<ImageBitmap>((resolve, reject) => {
+                   if ('requestIdleCallback' in window) {
+                     (window as any).requestIdleCallback(() => {
+                       createImageBitmap(blob).then(resolve).catch(reject);
+                     });
+                   } else {
+                     setTimeout(() => {
+                       createImageBitmap(blob).then(resolve).catch(reject);
+                     }, 10);
+                   }
+                 });
+              })
               .then(bmp => {
                 if (window.__heroFrames) window.__heroFrames[i] = bmp;
               })
               .catch(() => {}) // Ignore background fetch errors
               .finally(() => {
                 activeRequests--;
-                processNext(); // Chain the next one
+                // Immediately chain the next one, no massive delay
+                processNext(); 
               });
           }
         }
         
-        // Start background stream, slightly delayed to prioritize page render
-        setTimeout(processNext, 1000);
+        // Start background stream slightly delayed to prioritize initial animations, but not 3.5s!
+        setTimeout(processNext, 800);
       },
     },
     {
@@ -126,6 +140,10 @@ export function AppPreloader({ children }: { children: React.ReactNode }) {
     }
     // Also scroll to top just in case
     window.scrollTo(0, 0);
+    // Force GSAP ScrollTrigger to recalculate now that elements are visible
+    setTimeout(() => {
+      window.dispatchEvent(new Event('resize'));
+    }, 100);
   }
 
   return (
@@ -133,7 +151,7 @@ export function AppPreloader({ children }: { children: React.ReactNode }) {
       {!siteVisible && (
         <LoaderScreen progress={progress} done={done} onExitComplete={handleExitComplete} />
       )}
-      <div style={{ visibility: siteVisible ? 'visible' : 'hidden' }}>{children}</div>
+      <div style={{ visibility: done ? 'visible' : 'hidden' }}>{children}</div>
     </>
   );
 }

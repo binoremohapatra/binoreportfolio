@@ -551,7 +551,10 @@ function ProjectsOrbit3D({ cardVariant }: { cardVariant: string }) {
     }
 
     return () => {
-      ScrollTrigger.getAll().forEach((t) => t.kill());
+      if (tl.scrollTrigger) {
+        tl.scrollTrigger.kill();
+      }
+      tl.kill();
       floatAnim?.kill();
     };
   }, [tier, isTouchDevice, prefersReducedMotion]);
