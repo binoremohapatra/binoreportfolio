@@ -78,7 +78,7 @@ export function LoaderScreen({
             className="text-[#e0303d] font-mono text-[10px] sm:text-xs tracking-[0.4em] uppercase font-bold animate-pulse" 
             style={{ textShadow: '0 0 12px rgba(224,48,61,0.6)' }}
           >
-            System Initialization
+            LOADING...
           </div>
           
           <div className="flex items-end gap-1">
