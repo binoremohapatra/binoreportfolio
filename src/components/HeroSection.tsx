@@ -385,7 +385,7 @@ export default function HeroSection() {
                   <div className="max-w-xl leading-relaxed text-[#d1d5db] font-bold text-[clamp(15px,1.6vw,18px)]">
                     <TextGenerateEffect
                       key={`p10-${animKeys.phase10}`}
-                      words="Building the client site + AI advisory chatbot for OM Associates, a tax and legal consultancy. Simultaneously developing ResearchConnect — a 4-module AI research collaboration platform — at Suvidha Mahila Mandal."
+                      words="Building an AI tax advisory chatbot for OM Associates. Simultaneously architecting Research Connect — an enterprise-grade MERN research platform with real-time Socket.IO infrastructure — at Suvidha Foundation."
                       duration={0.8}
                     />
                   </div>

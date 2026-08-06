@@ -127,7 +127,7 @@ function DnaHelixSvg() {
 
 const PROJECTS = [
   { id: 8, title: 'OM Associates', category: 'TypeScript', github: 'https://github.com/binoremohapatra/om-associates', link: 'https://om-associates.vercel.app', tech: 'NEXT.JS · TYPESCRIPT · TAILWIND' },
-  { id: 2, title: 'Research.connect', category: 'Project', github: 'https://github.com/binoremohapatra/Research.connect', link: 'https://research-connect-pink.vercel.app', iframeDisabled: true, image: '/images/research-connect.png', tech: 'HTML · CSS · JAVASCRIPT' },
+  { id: 2, title: 'Research Connect', category: 'Project', github: 'https://github.com/binoremohapatra/Research.connect', link: 'https://research-connect-pink.vercel.app', iframeDisabled: true, image: '/images/research-connect.png', tech: 'MERN · SOCKET.IO · REDIS · WEBRTC' },
   { id: 4, title: 'SubMeter', category: 'Java', github: 'https://github.com/binoremohapatra/submeter', link: 'https://submeter-lac.vercel.app', tech: 'JAVA · SPRING BOOT · MYSQL' },
   { id: 12, title: 'Portfolio v2', category: 'JavaScript', github: 'https://github.com/binoremohapatra/binore-portfolio', link: 'https://binore-portfolio.vercel.app', tech: 'REACT · JAVASCRIPT · TAILWIND' },
   { id: 13, title: 'Portfolio Binore', category: 'JavaScript', github: 'https://github.com/binoremohapatra/Portfolio-Binore', link: 'https://portfolio-binore.vercel.app', tech: 'REACT · NODE.JS · JAVASCRIPT' },

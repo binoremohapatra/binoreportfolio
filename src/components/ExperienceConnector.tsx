@@ -55,8 +55,8 @@ const EXPERIENCE_NODES: ExperienceNode[] = [
     category: 'INTERNSHIP',
     title: 'Suvidha Foundation',
     description:
-      'Full-Stack Developer Intern. Built Research Connect — a real-time research collaboration platform connecting researchers across institutions.',
-    tech: 'React · Node.js · MongoDB · WebSockets · Google Scholar API',
+      'Full-Stack Developer Intern. Architected Research Connect — an enterprise-grade AI research discovery & collaboration platform using a strict Feature-First MERN stack. Engineered a real-time Socket.IO infrastructure for messaging, WebRTC calls, and live notifications. Integrated Cloudflare R2, Redis caching, and background Google Scholar sync jobs.',
+    tech: 'React · Node.js · MongoDB · Socket.IO · Redis',
     side: 'right',
     baseZ: 40,
   }
