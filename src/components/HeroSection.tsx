@@ -254,7 +254,7 @@ export default function HeroSection() {
                 )}
 
                 {animKeys.phase2 > 0 && (
-                  <h1 className="flex flex-wrap items-center gap-3 sm:gap-4 font-bold tracking-tighter mb-4 text-[clamp(32px,10vw,72px)] leading-none" style={{ textShadow: '0 4px 24px rgba(0,0,0,0.6)' }}>
+                  <h1 className="flex flex-wrap items-center gap-2 sm:gap-4 font-bold tracking-tighter mb-4 text-[clamp(28px,8vw,72px)] leading-none" style={{ textShadow: '0 4px 24px rgba(0,0,0,0.6)' }}>
                     <BlurText key={`p2a-${animKeys.phase2}`} text="BINORE" delay={40} animateBy="letters" direction="top" className="text-white" />
                     <FadeUp playKey={animKeys.phase2} delay={200}>
                       <ShinyText text="MOHAPATRA" speed={3} className="text-[#e0303d]" />
@@ -274,14 +274,14 @@ export default function HeroSection() {
                 )}
 
                 {animKeys.phase4 > 0 && (
-                  <div className="text-[10px] sm:text-xs uppercase tracking-[0.2em] text-white/80 font-bold drop-shadow-md min-h-[30px] overflow-hidden whitespace-nowrap text-ellipsis max-w-full">
+                  <div className="text-[10px] sm:text-xs uppercase tracking-[0.2em] text-white/80 font-bold drop-shadow-md min-h-[30px] w-full">
                     <BlurText
                       key={`p4-${animKeys.phase4}`}
                       text="API DEVELOPMENT ✦ CLOUD DEPLOYMENT ✦ REACT ✦ NODE.JS ✦ SPRING BOOT"
                       delay={20}
                       animateBy="words"
                       direction="bottom"
-                      className="whitespace-nowrap inline-block"
+                      className="inline-block"
                     />
                   </div>
                 )}
@@ -290,7 +290,7 @@ export default function HeroSection() {
               {/* BEAT B: Direct Gaze */}
               <div ref={beatBRef} className="absolute inset-0 flex flex-col justify-center pointer-events-none opacity-0" style={{ fontFamily: 'Technor, sans-serif' }}>
                 {animKeys.phase5 > 0 && (
-                  <div className="leading-[1.05] tracking-tighter text-white font-[800] text-[clamp(40px,6vw,72px)] mb-6" style={{ textShadow: '0 4px 24px rgba(0,0,0,0.6)' }}>
+                  <div className="leading-[1.05] tracking-tighter text-white font-[800] text-[clamp(30px,7vw,72px)] mb-6" style={{ textShadow: '0 4px 24px rgba(0,0,0,0.6)' }}>
                     <SplitText
                       key={`p5-${animKeys.phase5}`}
                       text="I don't clone tutorials. I architect production stacks."
@@ -367,7 +367,7 @@ export default function HeroSection() {
                 )}
 
                 {animKeys.phase9 > 0 && (
-                  <div className="leading-[1.05] tracking-tighter text-white font-[800] text-[clamp(32px,5vw,64px)] mb-6" style={{ textShadow: '0 4px 24px rgba(0,0,0,0.6)' }}>
+                  <div className="leading-[1.05] tracking-tighter text-white font-[800] text-[clamp(26px,6vw,64px)] mb-6" style={{ textShadow: '0 4px 24px rgba(0,0,0,0.6)' }}>
                     <SplitText
                       key={`p9-${animKeys.phase9}`}
                       text="Two simultaneous full-stack internships. Two live AI platforms. One engineer."
@@ -436,12 +436,12 @@ export default function HeroSection() {
                       />
                     </div>
 
-                    <div className="flex flex-wrap items-center gap-6 pointer-events-auto">
+                    <div className="flex flex-col sm:flex-row flex-wrap items-start sm:items-center gap-4 sm:gap-6 pointer-events-auto">
                       <FadeUp playKey={animKeys.phase13} delay={0}>
                         <a
                           href="#projects"
                           onClick={(e) => handleScrollTo(e, '#projects')}
-                          className="group relative inline-flex items-center justify-center px-8 py-4 text-sm font-bold text-white bg-[#0d0f12] rounded-md overflow-hidden transition-transform hover:-translate-y-0.5"
+                          className="group relative inline-flex items-center justify-center px-6 py-3 sm:px-8 sm:py-4 text-xs sm:text-sm font-bold text-white bg-[#0d0f12] rounded-md overflow-hidden transition-transform hover:-translate-y-0.5 w-full sm:w-auto"
                           style={{ fontFamily: 'var(--font-mono, monospace)' }}
                         >
                           <span className="relative z-10 group-hover:text-white transition-colors duration-300">View My Work</span>
@@ -452,11 +452,11 @@ export default function HeroSection() {
                         <a
                           href="#connect"
                           onClick={(e) => handleScrollTo(e, '#connect')}
-                          className="group relative inline-flex items-center justify-center px-6 py-4 text-sm font-bold text-white bg-transparent transition-all"
+                          className="group relative inline-flex items-center justify-center px-4 py-3 sm:px-6 sm:py-4 text-xs sm:text-sm font-bold text-white bg-transparent transition-all w-full sm:w-auto text-center"
                           style={{ fontFamily: 'var(--font-mono, monospace)' }}
                         >
                           Get in Touch
-                          <div className="absolute bottom-2 left-6 right-6 h-[2px] bg-white opacity-30 group-hover:bg-[#e0303d] group-hover:opacity-100 transition-all duration-300" />
+                          <div className="absolute bottom-1 sm:bottom-2 left-4 right-4 sm:left-6 sm:right-6 h-[2px] bg-white opacity-30 group-hover:bg-[#e0303d] group-hover:opacity-100 transition-all duration-300" />
                         </a>
                       </FadeUp>
                     </div>
